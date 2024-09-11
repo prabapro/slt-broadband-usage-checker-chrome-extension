@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import fs from 'fs-extra';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 const version = packageJson.version;
@@ -8,6 +11,8 @@ const version = packageJson.version;
 export default defineConfig({
 	define: {
 		__APP_VERSION__: JSON.stringify(version),
+		__GA4_MEASUREMENT_ID__: JSON.stringify(process.env.GA4_MEASUREMENT_ID),
+		__GA4_API_SECRET__: JSON.stringify(process.env.GA4_API_SECRET),
 	},
 	build: {
 		outDir: 'dist',
@@ -20,7 +25,7 @@ export default defineConfig({
 			},
 			output: {
 				entryFileNames: '[name].js',
-				chunkFileNames: 'assets/[name].[hash].js',
+				chunkFileNames: 'shared/[name].[hash].js',
 				assetFileNames: 'assets/[name].[ext]',
 			},
 		},
@@ -39,6 +44,15 @@ export default defineConfig({
 				const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
 				manifest.version = version;
 				fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+			},
+		},
+		{
+			name: 'copy-helpers',
+			writeBundle() {
+				const srcPath = resolve(__dirname, 'src/utils/helpers.js');
+				const destPath = resolve(__dirname, 'dist/shared/helpers.js');
+				fs.ensureDirSync(resolve(__dirname, 'dist/shared'));
+				fs.copyFileSync(srcPath, destPath);
 			},
 		},
 	],

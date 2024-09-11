@@ -1,4 +1,5 @@
 import { formatSubscriberId } from '../utils/helpers.js';
+import { sendPageView, sendEvent } from '../services/analytics.js';
 
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
 const HELP_URL = 'mailto:prabapro+chromeapps@gmail.com';
@@ -103,22 +104,41 @@ const mockData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-	document
-		.getElementById('refresh-btn')
-		.addEventListener('click', () => checkUsage(true));
-	document
-		.getElementById('reset-btn')
-		.addEventListener('click', resetExtension);
-	document.getElementById('help-btn').addEventListener('click', openHelpPage);
+	document.getElementById('refresh-btn').addEventListener('click', () => {
+		sendEvent('refresh_clicked', {}, __APP_VERSION__);
+		checkUsage(true);
+	});
+	document.getElementById('reset-btn').addEventListener('click', () => {
+		sendEvent('extension_reset', {}, __APP_VERSION__);
+		resetExtension();
+	});
+	document.getElementById('help-btn').addEventListener('click', () => {
+		sendEvent('help_clicked', {}, __APP_VERSION__);
+		openHelpPage();
+	});
 	checkAuthAndDisplay();
+
+	// Send page view event
+	sendPageView(
+		'SLT Usage Checker Popup',
+		document.location.href,
+		__APP_VERSION__
+	);
 });
 
+let currentPage = 0;
+let totalPages = 0;
+
 const checkAuthAndDisplay = async () => {
-	const { authToken, clientId, subscriberId } = await new Promise((resolve) =>
-		chrome.storage.local.get(['authToken', 'clientId', 'subscriberId'], resolve)
+	const { authToken, sltClientId, subscriberId } = await new Promise(
+		(resolve) =>
+			chrome.storage.local.get(
+				['authToken', 'sltClientId', 'subscriberId'],
+				resolve
+			)
 	);
 
-	if (!authToken || !clientId || !subscriberId) {
+	if (!authToken || !sltClientId || !subscriberId) {
 		showWelcomeScreen();
 	} else {
 		checkUsage(false);
@@ -141,33 +161,38 @@ const showWelcomeScreen = () => {
 	const welcomeScreen = document.createElement('div');
 	welcomeScreen.id = 'welcome-screen';
 	welcomeScreen.innerHTML = `
-	  <h2>Hey 👋</h2>
-	  <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
-	  <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
-	  <button id="welcome-login-btn">Open MySLT Portal</button>
-	`;
+    <h2>Hey 👋</h2>
+    <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
+    <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
+    <button id="welcome-login-btn">Open MySLT Portal</button>
+  `;
 
 	document.body.insertBefore(welcomeScreen, mainContent);
 
 	document.getElementById('welcome-login-btn').addEventListener('click', () => {
+		sendEvent('welcome_login_clicked', {}, __APP_VERSION__);
 		chrome.tabs.create({ url: 'https://myslt.slt.lk/' });
 	});
-};
 
-let currentPage = 0;
-let totalPages = 0;
+	// Send page view event for welcome screen
+	sendPageView(
+		'SLT Usage Checker Welcome Screen',
+		document.location.href,
+		__APP_VERSION__
+	);
+};
 
 const checkUsage = async (forceRefresh = false) => {
 	console.log('checkUsage called, forceRefresh:', forceRefresh);
 	clearError();
 
 	try {
-		const { authToken, clientId, cachedData, cacheTimestamp, subscriberId } =
+		const { authToken, sltClientId, cachedData, cacheTimestamp, subscriberId } =
 			await new Promise((resolve) =>
 				chrome.storage.local.get(
 					[
 						'authToken',
-						'clientId',
+						'sltClientId',
 						'cachedData',
 						'cacheTimestamp',
 						'subscriberId',
@@ -191,7 +216,7 @@ const checkUsage = async (forceRefresh = false) => {
 		console.log('Cache duration:', `${CACHE_DURATION / 1000} seconds`);
 		console.log('Stored subscriberId:', subscriberId);
 
-		if (!authToken || !clientId || !subscriberId) {
+		if (!authToken || !sltClientId || !subscriberId) {
 			showWelcomeScreen();
 			return;
 		}
@@ -203,18 +228,21 @@ const checkUsage = async (forceRefresh = false) => {
 			now - cacheTimestamp < CACHE_DURATION
 		) {
 			console.log('Using cached data');
+			sendEvent('usage_checked', { data_source: 'cache' }, __APP_VERSION__);
 			displayUsageData(cachedData, subscriberId);
 		} else {
 			console.log('Fetching fresh data');
-			await fetchAllData(authToken, clientId, subscriberId);
+			sendEvent('usage_checked', { data_source: 'api' }, __APP_VERSION__);
+			await fetchAllData(authToken, sltClientId, subscriberId);
 		}
 	} catch (error) {
 		console.error('Error in checkUsage:', error);
+		sendEvent('error', { error_type: 'check_usage_error' }, __APP_VERSION__);
 		showError('An unexpected error occurred. Please try again later.');
 	}
 };
 
-const fetchAllData = async (authToken, clientId, subscriberId) => {
+const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 	if (USE_MOCK_DATA) {
 		const data = mockData;
 		const timestamp = Date.now();
@@ -236,11 +264,11 @@ const fetchAllData = async (authToken, clientId, subscriberId) => {
 	try {
 		const [usageSummary, extraGB, bonusData, vasBundles, freeData] =
 			await Promise.all([
-				fetchUsageSummary(authToken, clientId, subscriberId),
-				fetchExtraGB(authToken, clientId, subscriberId),
-				fetchBonusData(authToken, clientId, subscriberId),
-				fetchGetDashboardVASBundles(authToken, clientId, subscriberId),
-				fetchFreeData(authToken, clientId, subscriberId),
+				fetchUsageSummary(authToken, sltClientId, subscriberId),
+				fetchExtraGB(authToken, sltClientId, subscriberId),
+				fetchBonusData(authToken, sltClientId, subscriberId),
+				fetchGetDashboardVASBundles(authToken, sltClientId, subscriberId),
+				fetchFreeData(authToken, sltClientId, subscriberId),
 			]);
 
 		const combinedData = {
@@ -272,6 +300,7 @@ const fetchAllData = async (authToken, clientId, subscriberId) => {
 		displayUsageData(combinedData, subscriberId);
 	} catch (error) {
 		console.error('Error fetching data:', error);
+		sendEvent('error', { error_type: 'data_fetch_error' }, __APP_VERSION__);
 		showError(
 			'Error fetching data. Your session might have expired. Please try re-login.'
 		);
@@ -290,6 +319,13 @@ const displayUsageData = (data, subscriberId) => {
 	updateAccountInfo(subscriberId);
 	createUsageDataGroups(data.usage_data);
 	updateLastUpdatedTime(data.reported_time);
+
+	// Send page view event for usage data screen
+	sendPageView(
+		'SLT Usage Data Screen',
+		document.location.href,
+		__APP_VERSION__
+	);
 };
 
 const updateAccountInfo = (accountId) => {
@@ -320,12 +356,27 @@ const createUsageDataGroups = (usageData) => {
 		if (items.length > 0) {
 			const group = createDataGroup(serviceName, items);
 			group.classList.toggle('active', index === 0);
+			group.dataset.groupName = serviceName;
+			group.dataset.bandName = items[0].name; // Store the 'name' property
 			usageContainer.appendChild(group);
 		}
 	});
 
 	totalPages = usageContainer.children.length;
 	updatePagination();
+
+	// Send event for the initially viewed group
+	if (totalPages > 0) {
+		const initialGroup = usageContainer.children[0];
+		sendEvent(
+			'group_viewed',
+			{
+				group_name: initialGroup.dataset.groupName,
+				band_name: initialGroup.dataset.bandName,
+			},
+			__APP_VERSION__
+		);
+	}
 };
 
 const createDataGroup = (serviceName, items) => {
@@ -367,25 +418,27 @@ const createProgressBar = (data) => {
 		: 'fill-very-high';
 
 	progressBar.innerHTML = `
-	  <h3>${data.name}</h3>
-	  <div class="bar">
-		<div class="fill ${fillClass}" style="width: ${Math.min(
+    <h3>${data.name}</h3>
+    <div class="bar">
+      <div class="fill ${fillClass}" style="width: ${Math.min(
 		usedPercentage,
 		100
 	)}%"></div>
-	  </div>
-	  <div class="progress-info">
-		<span>
-		  <span class="usage-amount">${usedAmount.toFixed(1)} ${
+    </div>
+    <div class="progress-info">
+      <span>
+        <span class="usage-amount">${usedAmount.toFixed(1)} ${
 		data.volume_unit
 	}</span> / 
-		  <span class="total-amount">${totalAmount.toFixed(1)} ${
+        <span class="total-amount">${totalAmount.toFixed(1)} ${
 		data.volume_unit
 	}</span>
-		</span>
-		<span class="status-text ${isExceeded ? 'exceeded' : ''}">${statusText}</span>
-	  </div>
-	`;
+      </span>
+      <span class="status-text ${
+				isExceeded ? 'exceeded' : ''
+			}">${statusText}</span>
+    </div>
+  `;
 
 	return progressBar;
 };
@@ -407,7 +460,18 @@ const goToPage = (pageNumber) => {
 
 	const groups = document.querySelectorAll('.data-group');
 	groups.forEach((group, index) => {
-		group.classList.toggle('active', index === pageNumber);
+		const isActive = index === pageNumber;
+		group.classList.toggle('active', isActive);
+		if (isActive) {
+			sendEvent(
+				'group_viewed',
+				{
+					group_name: group.dataset.groupName,
+					band_name: group.dataset.bandName,
+				},
+				__APP_VERSION__
+			);
+		}
 	});
 
 	currentPage = pageNumber;
@@ -500,14 +564,28 @@ const clearError = () => {
 
 const resetExtension = () => {
 	console.log('Clearing stored data and preparing to re-authenticate');
-
+	sendEvent('extension_reset', {}, __APP_VERSION__);
 	showMessage('Clearing extension data...', 'info');
 
 	chrome.storage.local.remove(
-		['authToken', 'clientId', 'cachedData', 'cacheTimestamp', 'subscriberId'],
+		[
+			'authToken',
+			'sltClientId',
+			'cachedData',
+			'cacheTimestamp',
+			'subscriberId',
+		],
 		() => {
 			if (chrome.runtime.lastError) {
 				console.error('Error clearing data:', chrome.runtime.lastError);
+				sendEvent(
+					'error',
+					{
+						error_type: 'clear_data_error',
+						error_message: chrome.runtime.lastError.message,
+					},
+					__APP_VERSION__
+				);
 				showMessage('Error clearing data. Please try again.', 'error');
 			} else {
 				showMessage('Data cleared. Please re-authenticate.', 'success');
@@ -531,6 +609,7 @@ const showMessage = (message, type = 'info') => {
 };
 
 const openHelpPage = () => {
+	sendEvent('help_page_opened', {}, __APP_VERSION__);
 	chrome.tabs.create({ url: HELP_URL });
 };
 
@@ -567,28 +646,41 @@ const getSubscriberId = () =>
 	});
 
 // Helper function to reduce repetition in fetch calls
-const fetchFromAPI = async (endpoint, authToken, clientId, subscriberId) => {
-	const response = await fetch(
-		`${BASE_URL}/${endpoint}?subscriberID=${subscriberId}`,
-		{
-			headers: {
-				accept: 'application/json, text/plain, */*',
-				authorization: authToken,
-				'x-ibm-client-id': clientId,
-			},
+const fetchFromAPI = async (endpoint, authToken, sltClientId, subscriberId) => {
+	try {
+		const response = await fetch(
+			`${BASE_URL}/${endpoint}?subscriberID=${subscriberId}`,
+			{
+				headers: {
+					accept: 'application/json, text/plain, */*',
+					authorization: authToken,
+					'x-ibm-client-id': sltClientId,
+				},
+			}
+		);
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-	);
-	if (!response.ok) {
-		throw new Error(`HTTP error! status: ${response.status}`);
+		return response.json();
+	} catch (error) {
+		sendEvent(
+			'error',
+			{
+				error_type: 'api_fetch_error',
+				error_message: error.message,
+				endpoint: endpoint,
+			},
+			__APP_VERSION__
+		);
+		throw error; // Re-throw the error to be handled by the caller
 	}
-	return response.json();
 };
 
-const fetchUsageSummary = async (authToken, clientId, subscriberId) => {
+const fetchUsageSummary = async (authToken, sltClientId, subscriberId) => {
 	const data = await fetchFromAPI(
 		'UsageSummary',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return {
@@ -601,8 +693,13 @@ const fetchUsageSummary = async (authToken, clientId, subscriberId) => {
 	};
 };
 
-const fetchExtraGB = async (authToken, clientId, subscriberId) => {
-	const data = await fetchFromAPI('ExtraGB', authToken, clientId, subscriberId);
+const fetchExtraGB = async (authToken, sltClientId, subscriberId) => {
+	const data = await fetchFromAPI(
+		'ExtraGB',
+		authToken,
+		sltClientId,
+		subscriberId
+	);
 	return data.dataBundle.usageDetails.map((item) => ({
 		...item,
 		service_name: 'Extra GB',
@@ -610,11 +707,11 @@ const fetchExtraGB = async (authToken, clientId, subscriberId) => {
 	}));
 };
 
-const fetchBonusData = async (authToken, clientId, subscriberId) => {
+const fetchBonusData = async (authToken, sltClientId, subscriberId) => {
 	const data = await fetchFromAPI(
 		'BonusData',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return data.dataBundle.usageDetails.map((item) => ({
@@ -626,13 +723,13 @@ const fetchBonusData = async (authToken, clientId, subscriberId) => {
 
 const fetchGetDashboardVASBundles = async (
 	authToken,
-	clientId,
+	sltClientId,
 	subscriberId
 ) => {
 	const data = await fetchFromAPI(
 		'GetDashboardVASBundles',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return data.dataBundle.usageDetails.map((item) => ({
@@ -642,11 +739,11 @@ const fetchGetDashboardVASBundles = async (
 	}));
 };
 
-const fetchFreeData = async (authToken, clientId, subscriberId) => {
+const fetchFreeData = async (authToken, sltClientId, subscriberId) => {
 	const data = await fetchFromAPI(
 		'FreeData',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return data.dataBundle.usageDetails.map((item) => ({
