@@ -1,9 +1,6 @@
 # SLT Broadband Usage Checker (Unofficial) Chrome Extension
 
-> [!NOTE]
-> Built with Vite and Vanilla JS
-
-# 📔 Web Store Listing
+[![Chrome Web Store Logo](available-in-chrome.png)](https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep)
 
 ## Overview
 
@@ -60,6 +57,9 @@
 ---
 
 # 👨‍💻 Development
+
+> [!NOTE]
+> Built with Vite and Vanilla JS
 
 ## 1. Project Setup
 
