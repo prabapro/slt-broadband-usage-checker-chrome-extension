@@ -49,7 +49,7 @@ async function getOrCreateSessionId() {
 }
 
 // Send page view event to GA4
-async function sendPageView(pageTitle, pageLocation) {
+async function sendPageView(pageTitle, pageLocation, version) {
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
@@ -63,6 +63,7 @@ async function sendPageView(pageTitle, pageLocation) {
 					engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
 					page_title: pageTitle,
 					page_location: pageLocation,
+					app_version: version, // Add the version to the page_view event
 				},
 			},
 		],
@@ -78,14 +79,14 @@ async function sendPageView(pageTitle, pageLocation) {
 			throw new Error('GA4 page_view request failed');
 		}
 
-		console.log('Page view sent to GA4:', pageTitle);
+		console.log('Page view sent to GA4:', pageTitle, { app_version: version });
 	} catch (error) {
 		console.error('Error sending page view to GA4:', error);
 	}
 }
 
 // Send event to GA4
-async function sendEvent(name, params = {}) {
+async function sendEvent(name, params = {}, version) {
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
@@ -98,6 +99,7 @@ async function sendEvent(name, params = {}) {
 					...params,
 					session_id: sessionId,
 					engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
+					app_version: version, // Add the version to all events
 				},
 			},
 		],
@@ -113,7 +115,10 @@ async function sendEvent(name, params = {}) {
 			throw new Error('GA4 request failed');
 		}
 
-		console.log('Event sent to GA4:', name, params);
+		console.log('Event sent to GA4:', name, {
+			...params,
+			app_version: version,
+		});
 	} catch (error) {
 		console.error('Error sending event to GA4:', error);
 	}

@@ -105,21 +105,25 @@ const mockData = {
 
 document.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('refresh-btn').addEventListener('click', () => {
-		sendEvent('refresh_clicked');
+		sendEvent('refresh_clicked', {}, __APP_VERSION__);
 		checkUsage(true);
 	});
 	document.getElementById('reset-btn').addEventListener('click', () => {
-		sendEvent('extension_reset');
+		sendEvent('extension_reset', {}, __APP_VERSION__);
 		resetExtension();
 	});
 	document.getElementById('help-btn').addEventListener('click', () => {
-		sendEvent('help_clicked');
+		sendEvent('help_clicked', {}, __APP_VERSION__);
 		openHelpPage();
 	});
 	checkAuthAndDisplay();
 
 	// Send page view event
-	sendPageView('SLT Usage Checker Popup', document.location.href);
+	sendPageView(
+		'SLT Usage Checker Popup',
+		document.location.href,
+		__APP_VERSION__
+	);
 });
 
 let currentPage = 0;
@@ -166,12 +170,16 @@ const showWelcomeScreen = () => {
 	document.body.insertBefore(welcomeScreen, mainContent);
 
 	document.getElementById('welcome-login-btn').addEventListener('click', () => {
-		sendEvent('welcome_login_clicked');
+		sendEvent('welcome_login_clicked', {}, __APP_VERSION__);
 		chrome.tabs.create({ url: 'https://myslt.slt.lk/' });
 	});
 
 	// Send page view event for welcome screen
-	sendPageView('SLT Usage Checker Welcome Screen', document.location.href);
+	sendPageView(
+		'SLT Usage Checker Welcome Screen',
+		document.location.href,
+		__APP_VERSION__
+	);
 };
 
 const checkUsage = async (forceRefresh = false) => {
@@ -220,16 +228,16 @@ const checkUsage = async (forceRefresh = false) => {
 			now - cacheTimestamp < CACHE_DURATION
 		) {
 			console.log('Using cached data');
-			sendEvent('usage_checked', { data_source: 'cache' });
+			sendEvent('usage_checked', { data_source: 'cache' }, __APP_VERSION__);
 			displayUsageData(cachedData, subscriberId);
 		} else {
 			console.log('Fetching fresh data');
-			sendEvent('usage_checked', { data_source: 'api' });
+			sendEvent('usage_checked', { data_source: 'api' }, __APP_VERSION__);
 			await fetchAllData(authToken, sltClientId, subscriberId);
 		}
 	} catch (error) {
 		console.error('Error in checkUsage:', error);
-		sendEvent('error', { error_type: 'check_usage_error' });
+		sendEvent('error', { error_type: 'check_usage_error' }, __APP_VERSION__);
 		showError('An unexpected error occurred. Please try again later.');
 	}
 };
@@ -292,7 +300,7 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 		displayUsageData(combinedData, subscriberId);
 	} catch (error) {
 		console.error('Error fetching data:', error);
-		sendEvent('error', { error_type: 'data_fetch_error' });
+		sendEvent('error', { error_type: 'data_fetch_error' }, __APP_VERSION__);
 		showError(
 			'Error fetching data. Your session might have expired. Please try re-login.'
 		);
@@ -313,7 +321,11 @@ const displayUsageData = (data, subscriberId) => {
 	updateLastUpdatedTime(data.reported_time);
 
 	// Send page view event for usage data screen
-	sendPageView('SLT Usage Data Screen', document.location.href);
+	sendPageView(
+		'SLT Usage Data Screen',
+		document.location.href,
+		__APP_VERSION__
+	);
 };
 
 const updateAccountInfo = (accountId) => {
@@ -356,10 +368,14 @@ const createUsageDataGroups = (usageData) => {
 	// Send event for the initially viewed group
 	if (totalPages > 0) {
 		const initialGroup = usageContainer.children[0];
-		sendEvent('group_viewed', {
-			group_name: initialGroup.dataset.groupName,
-			band_name: initialGroup.dataset.bandName,
-		});
+		sendEvent(
+			'group_viewed',
+			{
+				group_name: initialGroup.dataset.groupName,
+				band_name: initialGroup.dataset.bandName,
+			},
+			__APP_VERSION__
+		);
 	}
 };
 
@@ -447,10 +463,14 @@ const goToPage = (pageNumber) => {
 		const isActive = index === pageNumber;
 		group.classList.toggle('active', isActive);
 		if (isActive) {
-			sendEvent('group_viewed', {
-				group_name: group.dataset.groupName,
-				band_name: group.dataset.bandName,
-			});
+			sendEvent(
+				'group_viewed',
+				{
+					group_name: group.dataset.groupName,
+					band_name: group.dataset.bandName,
+				},
+				__APP_VERSION__
+			);
 		}
 	});
 
@@ -544,7 +564,7 @@ const clearError = () => {
 
 const resetExtension = () => {
 	console.log('Clearing stored data and preparing to re-authenticate');
-	sendEvent('extension_reset');
+	sendEvent('extension_reset', {}, __APP_VERSION__);
 	showMessage('Clearing extension data...', 'info');
 
 	chrome.storage.local.remove(
@@ -558,6 +578,14 @@ const resetExtension = () => {
 		() => {
 			if (chrome.runtime.lastError) {
 				console.error('Error clearing data:', chrome.runtime.lastError);
+				sendEvent(
+					'error',
+					{
+						error_type: 'clear_data_error',
+						error_message: chrome.runtime.lastError.message,
+					},
+					__APP_VERSION__
+				);
 				showMessage('Error clearing data. Please try again.', 'error');
 			} else {
 				showMessage('Data cleared. Please re-authenticate.', 'success');
@@ -581,7 +609,7 @@ const showMessage = (message, type = 'info') => {
 };
 
 const openHelpPage = () => {
-	sendEvent('help_page_opened');
+	sendEvent('help_page_opened', {}, __APP_VERSION__);
 	chrome.tabs.create({ url: HELP_URL });
 };
 
@@ -619,20 +647,33 @@ const getSubscriberId = () =>
 
 // Helper function to reduce repetition in fetch calls
 const fetchFromAPI = async (endpoint, authToken, sltClientId, subscriberId) => {
-	const response = await fetch(
-		`${BASE_URL}/${endpoint}?subscriberID=${subscriberId}`,
-		{
-			headers: {
-				accept: 'application/json, text/plain, */*',
-				authorization: authToken,
-				'x-ibm-client-id': sltClientId,
-			},
+	try {
+		const response = await fetch(
+			`${BASE_URL}/${endpoint}?subscriberID=${subscriberId}`,
+			{
+				headers: {
+					accept: 'application/json, text/plain, */*',
+					authorization: authToken,
+					'x-ibm-client-id': sltClientId,
+				},
+			}
+		);
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
 		}
-	);
-	if (!response.ok) {
-		throw new Error(`HTTP error! status: ${response.status}`);
+		return response.json();
+	} catch (error) {
+		sendEvent(
+			'error',
+			{
+				error_type: 'api_fetch_error',
+				error_message: error.message,
+				endpoint: endpoint,
+			},
+			__APP_VERSION__
+		);
+		throw error; // Re-throw the error to be handled by the caller
 	}
-	return response.json();
 };
 
 const fetchUsageSummary = async (authToken, sltClientId, subscriberId) => {
