@@ -657,3 +657,4 @@ const fetchFreeData = async (authToken, clientId, subscriberId) => {
 };
 
 console.log('Popup script loaded', new Date().toLocaleTimeString());
+console.log(`App version: ${__APP_VERSION__}`);

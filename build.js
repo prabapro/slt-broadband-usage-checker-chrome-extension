@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { build as viteBuild } from 'vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,10 +11,16 @@ const __dirname = path.dirname(__filename);
 const execAsync = promisify(exec);
 
 async function build() {
+	// Get version from package.json
+	const packageJson = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
+	const version = packageJson.version;
+
+	console.log(`Building version ${version}...`);
+
 	// Run Vite build
 	console.log('Running Vite build...');
 	try {
-		await execAsync('vite build');
+		await viteBuild();
 	} catch (error) {
 		console.error('Vite build failed:', error);
 		process.exit(1);
@@ -29,6 +36,12 @@ async function build() {
 		await fs.move(wrongPopupPath, correctPopupPath, { overwrite: true });
 	}
 
+	// Update version in popup.html
+	console.log('Updating version in popup.html...');
+	let popupHtml = await fs.readFile(correctPopupPath, 'utf-8');
+	popupHtml = popupHtml.replace(/v\d+\.\d+\.\d+/g, `v${version}`);
+	await fs.writeFile(correctPopupPath, popupHtml);
+
 	// Ensure popup.css is in the correct location
 	console.log('Copying popup.css...');
 	const srcCssPath = path.resolve(__dirname, 'src', 'popup', 'popup.css');
@@ -37,12 +50,13 @@ async function build() {
 		await fs.copy(srcCssPath, distCssPath, { overwrite: true });
 	}
 
-	// Copy manifest
-	console.log('Copying manifest.json...');
-	await fs.copy(
-		path.resolve(__dirname, 'public', 'manifest.json'),
-		path.join(distDir, 'manifest.json')
-	);
+	// Copy and update manifest
+	console.log('Copying and updating manifest.json...');
+	const manifestSrcPath = path.resolve(__dirname, 'public', 'manifest.json');
+	const manifestDestPath = path.join(distDir, 'manifest.json');
+	let manifest = JSON.parse(await fs.readFile(manifestSrcPath, 'utf-8'));
+	manifest.version = version;
+	await fs.writeJson(manifestDestPath, manifest, { spaces: 2 });
 
 	// Copy images
 	console.log('Copying images...');
@@ -58,7 +72,7 @@ async function build() {
 		await fs.remove(srcDir);
 	}
 
-	console.log('Build completed successfully!');
+	console.log(`Build for version ${version} completed successfully!`);
 }
 
 build().catch(console.error);

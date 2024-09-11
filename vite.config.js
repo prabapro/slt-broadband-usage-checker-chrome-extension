@@ -1,7 +1,14 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import fs from 'fs-extra';
+
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+const version = packageJson.version;
 
 export default defineConfig({
+	define: {
+		__APP_VERSION__: JSON.stringify(version),
+	},
 	build: {
 		outDir: 'dist',
 		emptyOutDir: true,
@@ -18,4 +25,21 @@ export default defineConfig({
 			},
 		},
 	},
+	plugins: [
+		{
+			name: 'version-injection',
+			transformIndexHtml(html) {
+				return html.replace(/v\d+\.\d+\.\d+/g, `v${version}`);
+			},
+		},
+		{
+			name: 'manifest-version',
+			writeBundle() {
+				const manifestPath = resolve(__dirname, 'dist/manifest.json');
+				const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+				manifest.version = version;
+				fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+			},
+		},
+	],
 });
