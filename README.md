@@ -79,14 +79,14 @@
 3. Install Vite and other necessary dependencies:
 
    ```bash
-   npm install --save-dev vite fs-extra
+   npm install --save-dev vite fs-extra archiver
    ```
 
 4. Create the project structure and empty files:
 
    ```bash
    # Create directories
-   mkdir -p src/{background,content,popup,utils} public/images
+   mkdir -p src/{background,content,popup,utils} public/images dist_zip
 
    # Create empty files
    touch src/background/background.js \
@@ -109,6 +109,7 @@
    ```
    .
    ├── build.js
+   ├── dist_zip
    ├── package.json
    ├── public
    │   ├── images
@@ -130,6 +131,43 @@
    │       └── helpers.js
    └── vite.config.js
    ```
+
+## 2. Project Structure
+
+Your project should have the following directory structure:
+
+```
+slt-bb-usage-checker/
+├── src/
+│   ├── background/
+│   │   └── background.js
+│   ├── content/
+│   │   └── content.js
+│   ├── popup/
+│   │   ├── popup.html
+│   │   ├── popup.js
+│   │   └── popup.css
+│   └── utils/
+│       └── helpers.js
+├── public/
+│   ├── manifest.json
+│   └── images/
+│       ├── icon16.png
+│       ├── icon32.png
+│       ├── icon48.png
+│       └── icon128.png
+├── dist/              (created during build)
+├── dist_zip/          (created during build)
+├── build.js
+├── vite.config.js
+└── package.json
+```
+
+> [!NOTE]
+>
+> - The `dist` folder will be created during the build process and will contain your compiled extension.
+> - The `dist_zip` folder will contain zipped versions of your built extension, ready for distribution.
+> - Ensure that `dist/` and `dist_zip/` are added to your `.gitignore` file.
 
 ## 2. Project Structure
 
