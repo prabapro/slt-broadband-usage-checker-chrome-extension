@@ -4,11 +4,27 @@ import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { build as viteBuild } from 'vite';
+import archiver from 'archiver';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const execAsync = promisify(exec);
+
+async function zipDirectory(sourceDir, outPath) {
+	const archive = archiver('zip', { zlib: { level: 9 } });
+	const stream = fs.createWriteStream(outPath);
+
+	return new Promise((resolve, reject) => {
+		archive
+			.directory(sourceDir, false)
+			.on('error', (err) => reject(err))
+			.pipe(stream);
+
+		stream.on('close', () => resolve());
+		archive.finalize();
+	});
+}
 
 async function build() {
 	// Get version from package.json
@@ -73,6 +89,17 @@ async function build() {
 	}
 
 	console.log(`Build for version ${version} completed successfully!`);
+
+	// Create dist_zip folder if it doesn't exist
+	const distZipDir = path.resolve(__dirname, 'dist_zip');
+	await fs.ensureDir(distZipDir);
+
+	// Zip the dist folder
+	const zipFileName = `release_v${version}.zip`;
+	const zipFilePath = path.join(distZipDir, zipFileName);
+	console.log(`Creating ${zipFileName} in dist_zip folder...`);
+	await zipDirectory(distDir, zipFilePath);
+	console.log(`${zipFileName} created successfully in dist_zip folder!`);
 }
 
 build().catch(console.error);

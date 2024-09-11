@@ -246,13 +246,39 @@ const execAsync = promisify(exec);
 ## 5. Building the Extension
 
 > [!TIP]
-> Update the version only on `package.json` - Vite will automatically update the version in `manifest.json` & `popup.html` during the build process.
+>
+> - Update the version only in `package.json` - The build process will automatically update the version in `manifest.json` and `popup.html`.
+> - Always run the build process before testing or distributing your extension to ensure all files are up-to-date.
 
-1. Run the build command:
+1. Update the version in `package.json` if you're preparing a new release:
+
+   ```json
+   {
+   	"version": "1.0.2"
+   }
+   ```
+
+2. Run the build command:
+
    ```bash
    npm run build
    ```
-2. Verify that the `dist` folder contains the correct structure:
+
+3. The build process will:
+
+   - Compile and bundle your source files using Vite
+   - Update the version in `manifest.json` and `popup.html`
+   - Move files to their correct locations in the `dist` folder
+   - Clean up any unnecessary files or directories
+
+4. After the build, a zip file of your extension will be created:
+
+   - The zip file will be named `release_v{version}.zip` (e.g., `release_v1.0.2.zip`)
+   - It will be located in the `dist_zip` folder in your project root
+   - This zip file contains the contents of the `dist` folder, ready for distribution
+
+5. Verify that the `dist` folder contains the correct structure:
+
    ```
    dist/
    ├── images/
@@ -264,6 +290,18 @@ const execAsync = promisify(exec);
    ├── popup.html
    └── popup.js
    ```
+
+6. The `dist_zip` folder will contain your zipped extension:
+   ```
+   dist_zip/
+   └── release_v1.0.2.zip
+   ```
+
+> [!NOTE]
+>
+> - The `dist` folder contains your unpackaged extension, which you can use for testing in Chrome.
+> - The zip file in `dist_zip` is what you would submit to the Chrome Web Store for publication.
+> - Always test the unpacked extension from the `dist` folder before distributing the zip file to ensure everything works as expected.pup.js
 
 ## 6. Loading the Extension in Chrome
 
