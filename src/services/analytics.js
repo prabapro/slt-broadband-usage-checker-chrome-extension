@@ -1,7 +1,7 @@
 // analytics.js
 
-const GA4_MEASUREMENT_ID = 'G-TR8RD821G1'; // Replace with your GA4 Measurement ID
-const GA4_API_SECRET = 'CYLIhdDsSOmvQ8NDr6n6CQ'; // Replace with your GA4 API Secret
+const GA4_MEASUREMENT_ID = __GA4_MEASUREMENT_ID__;
+const GA4_API_SECRET = __GA4_API_SECRET__;
 const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
 const SESSION_EXPIRATION_IN_MIN = 30;
 const DEFAULT_ENGAGEMENT_TIME_IN_MSEC = 100;

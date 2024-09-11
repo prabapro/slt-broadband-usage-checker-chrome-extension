@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import fs from 'fs-extra';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 const version = packageJson.version;
@@ -8,6 +11,8 @@ const version = packageJson.version;
 export default defineConfig({
 	define: {
 		__APP_VERSION__: JSON.stringify(version),
+		__GA4_MEASUREMENT_ID__: JSON.stringify(process.env.GA4_MEASUREMENT_ID),
+		__GA4_API_SECRET__: JSON.stringify(process.env.GA4_API_SECRET),
 	},
 	build: {
 		outDir: 'dist',
