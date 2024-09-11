@@ -1,4 +1,5 @@
 import { formatSubscriberId } from '../utils/helpers.js';
+import { sendPageView, sendEvent } from '../services/analytics.js';
 
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
 const HELP_URL = 'mailto:prabapro+chromeapps@gmail.com';
@@ -103,22 +104,34 @@ const mockData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-	document
-		.getElementById('refresh-btn')
-		.addEventListener('click', () => checkUsage(true));
-	document
-		.getElementById('reset-btn')
-		.addEventListener('click', resetExtension);
-	document.getElementById('help-btn').addEventListener('click', openHelpPage);
+	document.getElementById('refresh-btn').addEventListener('click', () => {
+		sendEvent('refresh_clicked');
+		checkUsage(true);
+	});
+	document.getElementById('reset-btn').addEventListener('click', () => {
+		sendEvent('reset_clicked');
+		resetExtension();
+	});
+	document.getElementById('help-btn').addEventListener('click', () => {
+		sendEvent('help_clicked');
+		openHelpPage();
+	});
 	checkAuthAndDisplay();
+
+	// Send page view event
+	sendPageView('SLT Usage Checker Popup', document.location.href);
 });
 
 const checkAuthAndDisplay = async () => {
-	const { authToken, clientId, subscriberId } = await new Promise((resolve) =>
-		chrome.storage.local.get(['authToken', 'clientId', 'subscriberId'], resolve)
+	const { authToken, sltClientId, subscriberId } = await new Promise(
+		(resolve) =>
+			chrome.storage.local.get(
+				['authToken', 'sltClientId', 'subscriberId'],
+				resolve
+			)
 	);
 
-	if (!authToken || !clientId || !subscriberId) {
+	if (!authToken || !sltClientId || !subscriberId) {
 		showWelcomeScreen();
 	} else {
 		checkUsage(false);
@@ -141,17 +154,21 @@ const showWelcomeScreen = () => {
 	const welcomeScreen = document.createElement('div');
 	welcomeScreen.id = 'welcome-screen';
 	welcomeScreen.innerHTML = `
-	  <h2>Hey 👋</h2>
-	  <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
-	  <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
-	  <button id="welcome-login-btn">Open MySLT Portal</button>
-	`;
+    <h2>Hey 👋</h2>
+    <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
+    <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
+    <button id="welcome-login-btn">Open MySLT Portal</button>
+  `;
 
 	document.body.insertBefore(welcomeScreen, mainContent);
 
 	document.getElementById('welcome-login-btn').addEventListener('click', () => {
+		sendEvent('welcome_login_clicked');
 		chrome.tabs.create({ url: 'https://myslt.slt.lk/' });
 	});
+
+	// Send page view event for welcome screen
+	sendPageView('SLT Usage Checker Welcome Screen', document.location.href);
 };
 
 let currentPage = 0;
@@ -162,12 +179,12 @@ const checkUsage = async (forceRefresh = false) => {
 	clearError();
 
 	try {
-		const { authToken, clientId, cachedData, cacheTimestamp, subscriberId } =
+		const { authToken, sltClientId, cachedData, cacheTimestamp, subscriberId } =
 			await new Promise((resolve) =>
 				chrome.storage.local.get(
 					[
 						'authToken',
-						'clientId',
+						'sltClientId',
 						'cachedData',
 						'cacheTimestamp',
 						'subscriberId',
@@ -191,7 +208,7 @@ const checkUsage = async (forceRefresh = false) => {
 		console.log('Cache duration:', `${CACHE_DURATION / 1000} seconds`);
 		console.log('Stored subscriberId:', subscriberId);
 
-		if (!authToken || !clientId || !subscriberId) {
+		if (!authToken || !sltClientId || !subscriberId) {
 			showWelcomeScreen();
 			return;
 		}
@@ -203,18 +220,21 @@ const checkUsage = async (forceRefresh = false) => {
 			now - cacheTimestamp < CACHE_DURATION
 		) {
 			console.log('Using cached data');
+			sendEvent('usage_checked', { data_source: 'cache' });
 			displayUsageData(cachedData, subscriberId);
 		} else {
 			console.log('Fetching fresh data');
-			await fetchAllData(authToken, clientId, subscriberId);
+			sendEvent('usage_checked', { data_source: 'api' });
+			await fetchAllData(authToken, sltClientId, subscriberId);
 		}
 	} catch (error) {
 		console.error('Error in checkUsage:', error);
+		sendEvent('error', { error_type: 'check_usage_error' });
 		showError('An unexpected error occurred. Please try again later.');
 	}
 };
 
-const fetchAllData = async (authToken, clientId, subscriberId) => {
+const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 	if (USE_MOCK_DATA) {
 		const data = mockData;
 		const timestamp = Date.now();
@@ -236,11 +256,11 @@ const fetchAllData = async (authToken, clientId, subscriberId) => {
 	try {
 		const [usageSummary, extraGB, bonusData, vasBundles, freeData] =
 			await Promise.all([
-				fetchUsageSummary(authToken, clientId, subscriberId),
-				fetchExtraGB(authToken, clientId, subscriberId),
-				fetchBonusData(authToken, clientId, subscriberId),
-				fetchGetDashboardVASBundles(authToken, clientId, subscriberId),
-				fetchFreeData(authToken, clientId, subscriberId),
+				fetchUsageSummary(authToken, sltClientId, subscriberId),
+				fetchExtraGB(authToken, sltClientId, subscriberId),
+				fetchBonusData(authToken, sltClientId, subscriberId),
+				fetchGetDashboardVASBundles(authToken, sltClientId, subscriberId),
+				fetchFreeData(authToken, sltClientId, subscriberId),
 			]);
 
 		const combinedData = {
@@ -272,6 +292,7 @@ const fetchAllData = async (authToken, clientId, subscriberId) => {
 		displayUsageData(combinedData, subscriberId);
 	} catch (error) {
 		console.error('Error fetching data:', error);
+		sendEvent('error', { error_type: 'data_fetch_error' });
 		showError(
 			'Error fetching data. Your session might have expired. Please try re-login.'
 		);
@@ -290,6 +311,9 @@ const displayUsageData = (data, subscriberId) => {
 	updateAccountInfo(subscriberId);
 	createUsageDataGroups(data.usage_data);
 	updateLastUpdatedTime(data.reported_time);
+
+	// Send page view event for usage data screen
+	sendPageView('SLT Usage Data Screen', document.location.href);
 };
 
 const updateAccountInfo = (accountId) => {
@@ -500,11 +524,17 @@ const clearError = () => {
 
 const resetExtension = () => {
 	console.log('Clearing stored data and preparing to re-authenticate');
-
+	sendEvent('extension_reset');
 	showMessage('Clearing extension data...', 'info');
 
 	chrome.storage.local.remove(
-		['authToken', 'clientId', 'cachedData', 'cacheTimestamp', 'subscriberId'],
+		[
+			'authToken',
+			'sltClientId',
+			'cachedData',
+			'cacheTimestamp',
+			'subscriberId',
+		],
 		() => {
 			if (chrome.runtime.lastError) {
 				console.error('Error clearing data:', chrome.runtime.lastError);
@@ -531,6 +561,7 @@ const showMessage = (message, type = 'info') => {
 };
 
 const openHelpPage = () => {
+	sendEvent('help_page_opened');
 	chrome.tabs.create({ url: HELP_URL });
 };
 
@@ -567,14 +598,14 @@ const getSubscriberId = () =>
 	});
 
 // Helper function to reduce repetition in fetch calls
-const fetchFromAPI = async (endpoint, authToken, clientId, subscriberId) => {
+const fetchFromAPI = async (endpoint, authToken, sltClientId, subscriberId) => {
 	const response = await fetch(
 		`${BASE_URL}/${endpoint}?subscriberID=${subscriberId}`,
 		{
 			headers: {
 				accept: 'application/json, text/plain, */*',
 				authorization: authToken,
-				'x-ibm-client-id': clientId,
+				'x-ibm-client-id': sltClientId,
 			},
 		}
 	);
@@ -584,11 +615,11 @@ const fetchFromAPI = async (endpoint, authToken, clientId, subscriberId) => {
 	return response.json();
 };
 
-const fetchUsageSummary = async (authToken, clientId, subscriberId) => {
+const fetchUsageSummary = async (authToken, sltClientId, subscriberId) => {
 	const data = await fetchFromAPI(
 		'UsageSummary',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return {
@@ -601,8 +632,13 @@ const fetchUsageSummary = async (authToken, clientId, subscriberId) => {
 	};
 };
 
-const fetchExtraGB = async (authToken, clientId, subscriberId) => {
-	const data = await fetchFromAPI('ExtraGB', authToken, clientId, subscriberId);
+const fetchExtraGB = async (authToken, sltClientId, subscriberId) => {
+	const data = await fetchFromAPI(
+		'ExtraGB',
+		authToken,
+		sltClientId,
+		subscriberId
+	);
 	return data.dataBundle.usageDetails.map((item) => ({
 		...item,
 		service_name: 'Extra GB',
@@ -610,11 +646,11 @@ const fetchExtraGB = async (authToken, clientId, subscriberId) => {
 	}));
 };
 
-const fetchBonusData = async (authToken, clientId, subscriberId) => {
+const fetchBonusData = async (authToken, sltClientId, subscriberId) => {
 	const data = await fetchFromAPI(
 		'BonusData',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return data.dataBundle.usageDetails.map((item) => ({
@@ -626,13 +662,13 @@ const fetchBonusData = async (authToken, clientId, subscriberId) => {
 
 const fetchGetDashboardVASBundles = async (
 	authToken,
-	clientId,
+	sltClientId,
 	subscriberId
 ) => {
 	const data = await fetchFromAPI(
 		'GetDashboardVASBundles',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return data.dataBundle.usageDetails.map((item) => ({
@@ -642,11 +678,11 @@ const fetchGetDashboardVASBundles = async (
 	}));
 };
 
-const fetchFreeData = async (authToken, clientId, subscriberId) => {
+const fetchFreeData = async (authToken, sltClientId, subscriberId) => {
 	const data = await fetchFromAPI(
 		'FreeData',
 		authToken,
-		clientId,
+		sltClientId,
 		subscriberId
 	);
 	return data.dataBundle.usageDetails.map((item) => ({

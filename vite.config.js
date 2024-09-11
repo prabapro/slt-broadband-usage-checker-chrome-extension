@@ -20,7 +20,7 @@ export default defineConfig({
 			},
 			output: {
 				entryFileNames: '[name].js',
-				chunkFileNames: 'assets/[name].[hash].js',
+				chunkFileNames: 'shared/[name].[hash].js',
 				assetFileNames: 'assets/[name].[ext]',
 			},
 		},
@@ -39,6 +39,15 @@ export default defineConfig({
 				const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
 				manifest.version = version;
 				fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+			},
+		},
+		{
+			name: 'copy-helpers',
+			writeBundle() {
+				const srcPath = resolve(__dirname, 'src/utils/helpers.js');
+				const destPath = resolve(__dirname, 'dist/shared/helpers.js');
+				fs.ensureDirSync(resolve(__dirname, 'dist/shared'));
+				fs.copyFileSync(srcPath, destPath);
 			},
 		},
 	],

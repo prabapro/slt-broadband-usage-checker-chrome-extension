@@ -1,5 +1,10 @@
 import { formatSubscriberId } from '../utils/helpers.js';
 
+// Listen for installation
+chrome.runtime.onInstalled.addListener(() => {
+	console.log('Extension installed');
+});
+
 chrome.webRequest.onBeforeRequest.addListener(
 	(details) => {
 		if (details.url.includes('omniscapp.slt.lk')) {
@@ -22,14 +27,14 @@ chrome.webRequest.onSendHeaders.addListener(
 			const authHeader = details.requestHeaders.find(
 				(h) => h.name.toLowerCase() === 'authorization'
 			);
-			const clientIdHeader = details.requestHeaders.find(
+			const sltClientIdHeader = details.requestHeaders.find(
 				(h) => h.name.toLowerCase() === 'x-ibm-client-id'
 			);
 
-			if (authHeader && clientIdHeader) {
+			if (authHeader && sltClientIdHeader) {
 				chrome.storage.local.set({
 					authToken: authHeader.value,
-					clientId: clientIdHeader.value,
+					sltClientId: sltClientIdHeader.value,
 				});
 			}
 		}
