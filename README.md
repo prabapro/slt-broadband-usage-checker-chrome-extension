@@ -339,7 +339,7 @@ const execAsync = promisify(exec);
 >
 > - The `dist` folder contains your unpackaged extension, which you can use for testing in Chrome.
 > - The zip file in `dist_zip` is what you would submit to the Chrome Web Store for publication.
-> - Always test the unpacked extension from the `dist` folder before distributing the zip file to ensure everything works as expected.pup.js
+> - Always test the unpacked extension from the `dist` folder before distributing the zip file to ensure everything works as expected.
 
 ## 6. Loading the Extension in Chrome
 
