@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		checkUsage(true);
 	});
 	document.getElementById('reset-btn').addEventListener('click', () => {
-		sendEvent('reset_clicked');
+		sendEvent('extension_reset');
 		resetExtension();
 	});
 	document.getElementById('help-btn').addEventListener('click', () => {
@@ -121,6 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Send page view event
 	sendPageView('SLT Usage Checker Popup', document.location.href);
 });
+
+let currentPage = 0;
+let totalPages = 0;
 
 const checkAuthAndDisplay = async () => {
 	const { authToken, sltClientId, subscriberId } = await new Promise(
@@ -170,9 +173,6 @@ const showWelcomeScreen = () => {
 	// Send page view event for welcome screen
 	sendPageView('SLT Usage Checker Welcome Screen', document.location.href);
 };
-
-let currentPage = 0;
-let totalPages = 0;
 
 const checkUsage = async (forceRefresh = false) => {
 	console.log('checkUsage called, forceRefresh:', forceRefresh);
@@ -344,12 +344,23 @@ const createUsageDataGroups = (usageData) => {
 		if (items.length > 0) {
 			const group = createDataGroup(serviceName, items);
 			group.classList.toggle('active', index === 0);
+			group.dataset.groupName = serviceName;
+			group.dataset.bandName = items[0].name; // Store the 'name' property
 			usageContainer.appendChild(group);
 		}
 	});
 
 	totalPages = usageContainer.children.length;
 	updatePagination();
+
+	// Send event for the initially viewed group
+	if (totalPages > 0) {
+		const initialGroup = usageContainer.children[0];
+		sendEvent('group_viewed', {
+			group_name: initialGroup.dataset.groupName,
+			band_name: initialGroup.dataset.bandName,
+		});
+	}
 };
 
 const createDataGroup = (serviceName, items) => {
@@ -391,25 +402,27 @@ const createProgressBar = (data) => {
 		: 'fill-very-high';
 
 	progressBar.innerHTML = `
-	  <h3>${data.name}</h3>
-	  <div class="bar">
-		<div class="fill ${fillClass}" style="width: ${Math.min(
+    <h3>${data.name}</h3>
+    <div class="bar">
+      <div class="fill ${fillClass}" style="width: ${Math.min(
 		usedPercentage,
 		100
 	)}%"></div>
-	  </div>
-	  <div class="progress-info">
-		<span>
-		  <span class="usage-amount">${usedAmount.toFixed(1)} ${
+    </div>
+    <div class="progress-info">
+      <span>
+        <span class="usage-amount">${usedAmount.toFixed(1)} ${
 		data.volume_unit
 	}</span> / 
-		  <span class="total-amount">${totalAmount.toFixed(1)} ${
+        <span class="total-amount">${totalAmount.toFixed(1)} ${
 		data.volume_unit
 	}</span>
-		</span>
-		<span class="status-text ${isExceeded ? 'exceeded' : ''}">${statusText}</span>
-	  </div>
-	`;
+      </span>
+      <span class="status-text ${
+				isExceeded ? 'exceeded' : ''
+			}">${statusText}</span>
+    </div>
+  `;
 
 	return progressBar;
 };
@@ -431,7 +444,14 @@ const goToPage = (pageNumber) => {
 
 	const groups = document.querySelectorAll('.data-group');
 	groups.forEach((group, index) => {
-		group.classList.toggle('active', index === pageNumber);
+		const isActive = index === pageNumber;
+		group.classList.toggle('active', isActive);
+		if (isActive) {
+			sendEvent('group_viewed', {
+				group_name: group.dataset.groupName,
+				band_name: group.dataset.bandName,
+			});
+		}
 	});
 
 	currentPage = pageNumber;

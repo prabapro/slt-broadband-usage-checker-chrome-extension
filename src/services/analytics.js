@@ -113,7 +113,7 @@ async function sendEvent(name, params = {}) {
 			throw new Error('GA4 request failed');
 		}
 
-		console.log('Event sent to GA4:', name);
+		console.log('Event sent to GA4:', name, params);
 	} catch (error) {
 		console.error('Error sending event to GA4:', error);
 	}
