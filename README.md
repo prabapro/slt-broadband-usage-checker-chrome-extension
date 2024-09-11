@@ -8,36 +8,39 @@
 
 🔥 Easily check your SLT (Sri Lanka Telecom 🇱🇰) Broadband Usage with just one click.
 
+---
+
 ### 🚀 Key Features:
 
-✅ **Secure Access**: Uses your existing MySLT Portal authentication - no separate login required.
-✅ **Quick Access**: View your data usage directly from your browser toolbar.
-✅ **Comprehensive Data**: See usage details for Main Pack, Extra GB, Bonus Data, Add-Ons, and Free Data.
-✅ **Visual Progress Bars**: Easily understand your data consumption with color-coded progress bars.
-✅ **Auto-Refresh**: Data automatically refreshes every hour, or manually refresh anytime.
-✅ **Last Updated Info**: Always know when your data was last refreshed.
-✅ **Easy Re-login**: Quick access to the MySLT portal if re-authentication is needed.
-✅ **Support Access**: Direct link to contact support for any issues or queries.
+- **Secure Access**: Uses your existing MySLT Portal authentication - no separate login required.
+- **Quick Access**: View your data usage directly from your browser toolbar.
+- **Comprehensive Data**: See usage details for Main Pack, Extra GB, Bonus Data, Add-Ons, and Free Data.
+- **Visual Progress Bars**: Easily understand your data consumption with color-coded progress bars.
+- **Auto-Refresh**: Data automatically refreshes every hour, or manually refresh anytime.
+- **Last Updated Info**: Always know when your data was last refreshed.
+- **Easy Re-login**: Quick access to the MySLT portal if re-authentication is needed.
+- **Support Access**: Direct link to contact support for any issues or queries.
 
 ### 🔥 How It Works:
 
-▪️ **Install & Log In**: Install the extension and log in to your MySLT account via the official MySLT Portal.
-▪️ **View Data Usage**: Once you’re logged in, click the extension icon to see your current data usage.
-▪️ **Secure Access**: The extension safely uses your active MySLT session to fetch the data—no need to enter your credentials in the extension.
-▪️ **Refresh Anytime**: Hit the ‘Refresh’ button to get the latest data instantly.
-▪️ **Clear Data**: Use the ‘Clear Data & Re-authenticate’ button to reset the data stored in the extension. This won’t log you out of the MySLT Portal.
+- **Install & Log In**: Install the extension and log in to your MySLT account via the official MySLT Portal.
+- **View Data Usage**: Once you’re logged in, click the extension icon to see your current data usage.
+- **Secure Access**: The extension safely uses your active MySLT session to fetch the data—no need to enter your credentials in the extension.
+- **Refresh Anytime**: Hit the ‘Refresh’ button to get the latest data instantly.
+- **Clear Data**: Use the ‘Clear Data & Re-authenticate’ button to reset the data stored in the extension. This won’t log you out of the MySLT Portal.
 
 ### 🔐 Privacy & Security:
 
-🛡️ This unofficial extension securely fetches data from SLT's official API using your existing MySLT Portal authentication.
-🛡️ It does not store or have access to your login credentials.
-🛡️ Your personal information is never transmitted or stored by the extension.
+- This unofficial extension securely fetches data from SLT's official API using your existing MySLT Portal authentication.
+- It does not store or have access to your login credentials.
+- Your personal information is never transmitted or stored by the extension.
 
 ### ❗Note:
 
-▪️ This is an unofficial extension and is not affiliated with, endorsed by, or connected to Sri Lanka Telecom PLC in any way. It is an independent tool created to enhance user experience.
-▪️ Some promotional materials, including screenshots and store tiles, may display simulated data for demonstration purposes. Actual usage data will vary based on individual user accounts.
-👨‍💻 Support: prabapro+chromeapps@gmail.com
+- This is an unofficial extension and is not affiliated with, endorsed by, or connected to Sri Lanka Telecom PLC in any way. It is an independent tool created to enhance user experience.
+- Some promotional materials, including screenshots and store tiles, may display simulated data for demonstration purposes. Actual usage data will vary based on individual user accounts.
+
+🤝 Support: prabapro+chromeapps@gmail.com
 
 ---
 
