@@ -1,0 +1,33 @@
+{
+	"manifest_version": 3,
+	"name": "SLT Broadband Usage Checker (Unofficial)",
+	"version": "1.0.1",
+	"description": "Check SLT Broadband usage with a single click",
+	"permissions": ["storage", "webRequest", "scripting"],
+	"host_permissions": ["https://myslt.slt.lk/*", "https://omniscapp.slt.lk/*"],
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://myslt.slt.lk/*"],
+			"js": ["content.js"]
+		}
+	],
+	"action": {
+		"default_popup": "popup.html",
+		"default_icon": {
+			"16": "images/icon16.png",
+			"32": "images/icon32.png",
+			"48": "images/icon48.png",
+			"128": "images/icon128.png"
+		}
+	},
+	"icons": {
+		"16": "images/icon16.png",
+		"32": "images/icon32.png",
+		"48": "images/icon48.png",
+		"128": "images/icon128.png"
+	}
+}

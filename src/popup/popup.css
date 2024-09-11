@@ -1,0 +1,297 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Poppins', sans-serif;
+	width: 550px;
+	height: auto;
+	padding: 30px;
+	background-color: #d9e1e8;
+	/* background-image: linear-gradient(147deg, #f9fcff 0%, #dee4ea 74%); */
+	background-image: linear-gradient(97deg, #d9e1e8 0%, #d9e1e8 74%);
+	color: #333;
+	display: flex;
+	flex-direction: column;
+}
+
+header {
+	display: flex;
+	align-items: center;
+}
+
+header h1 {
+	padding-top: 15px;
+}
+
+.logo {
+	width: 120px;
+	height: auto;
+	margin-right: 10px;
+}
+
+h1 {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+h1 sup {
+	font-size: 10px;
+	color: #666;
+}
+
+.error-message {
+	/* background-color: #ffebee; */
+	font-size: 16px;
+	color: #c62828;
+	padding: 15px;
+	text-align: center;
+	border-radius: 4px;
+	margin-top: 40px;
+	display: none;
+}
+
+#account-id {
+	font-size: 15px;
+	color: rgba(128, 128, 128, 0.626);
+	text-align: center;
+	padding: 10px 0;
+}
+
+main {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow: hidden;
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	margin: 15px 0;
+}
+
+.pagination-bullets {
+	display: flex;
+	gap: 15px; /* Space between bullets */
+}
+
+.bullet {
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	background-color: #ccc;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.bullet.active {
+	background-color: #007bff;
+}
+
+#usage-data {
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	height: 250px;
+	overflow-y: auto;
+}
+
+.data-group {
+	display: none;
+	padding: 10px 25px 0 25px;
+}
+
+.data-group.active {
+	display: block;
+}
+
+.data-group h2 {
+	font-size: 20px;
+	color: #1565c0;
+	padding: 15px 0;
+}
+
+.progress-bar {
+	margin-bottom: 25px;
+}
+
+.progress-bar h3 {
+	font-size: 14px;
+	margin-bottom: 5px;
+	font-weight: 500;
+}
+
+.bar {
+	height: 10px;
+	background-color: #e0e0e0;
+	border-radius: 5px;
+	overflow: hidden;
+	margin-bottom: 5px;
+}
+
+.fill {
+	height: 100%;
+	transition: width 0.3s ease;
+}
+
+.fill-low {
+	background: linear-gradient(to right, #4caf50, #8bc34a);
+}
+
+.fill-medium {
+	background: linear-gradient(to right, #8bc34a, #ffc107);
+}
+
+.fill-high {
+	background: linear-gradient(to right, #ffc107, #ff9800);
+}
+
+.fill-very-high {
+	background: linear-gradient(to right, #ff9800, #f44336);
+}
+
+.fill-exceeded {
+	background: linear-gradient(to right, #f44336, #d32f2f);
+}
+
+.progress-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	font-size: 14px;
+}
+
+.usage-amount {
+	font-weight: 300;
+}
+
+.total-amount {
+	font-weight: 600;
+}
+
+.status-text {
+	font-size: 12px;
+	color: #666;
+	margin-top: 2px;
+}
+
+.exceeded {
+	color: #c62828;
+	font-weight: 500;
+}
+
+footer {
+	margin-top: 30px;
+	display: inline-block;
+	text-align: center;
+}
+
+button {
+	padding: 8px 15px;
+	border: none;
+	border-radius: 50px;
+	font-family: 'Poppins', sans-serif;
+	font-size: 14px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	margin: 0 2px;
+}
+
+.bg-blue {
+	background-color: #1565c0;
+	color: #fff;
+}
+
+.bg-red {
+	background-color: #d63031;
+	color: #fff;
+}
+
+.bg-white {
+	background-color: #f5f5f5;
+	color: #333;
+}
+
+.bg-blue:hover {
+	background-color: #1976d2;
+}
+
+.bg-red:hover {
+	background-color: #ae2626;
+}
+
+.bg-white:hover {
+	background-color: #cbcbecac;
+}
+
+#last-updated {
+	text-align: center;
+	font-size: 12px;
+	color: #81808095;
+	margin-top: 15px;
+}
+
+#last-updated-time {
+	font-weight: 500;
+}
+
+#last-updated-relative {
+	margin-left: 5px;
+}
+.message {
+	padding: 10px;
+	margin: 10px 0;
+	border-radius: 5px;
+	text-align: center;
+}
+
+.message.info {
+	background-color: #e3f2fd;
+	color: #0d47a1;
+}
+
+.message.error {
+	background-color: #ffebee;
+	color: #b71c1c;
+}
+
+.message.success {
+	background-color: #e8f5e9;
+	color: #1b5e20;
+}
+#welcome-screen {
+	margin: 30px 20px;
+	text-align: center;
+	padding: 40px;
+	border-radius: 8px;
+	background-color: white;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#welcome-screen h2 {
+	margin-bottom: 20px;
+	font-size: 20px;
+}
+
+#welcome-screen p {
+	margin-bottom: 20px;
+	font-size: 16px;
+}
+
+#welcome-login-btn {
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 50px;
+	cursor: pointer;
+}
+
+#welcome-login-btn:hover {
+	background-color: #0056b3;
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>SLT Broadband Usage Checker (Unofficial)</title>
+		<link rel="stylesheet" href="popup.css" />
+	</head>
+	<body>
+		<header>
+			<img src="images/slt-logo.png" alt="SLT Logo" class="logo" />
+			<h1>
+				Broadband Usage Checker (Unofficial)
+				<sup>v1.0.1</sup>
+			</h1>
+		</header>
+
+		<div id="account-id"></div>
+		<div id="welcome-screen" style="display: none"></div>
+		<div id="errorMessage" class="error-message"></div>
+
+		<main>
+			<div id="usage-data"></div>
+			<div id="message" class="message" style="display: none"></div>
+			<!-- Usage data will be dynamically inserted here -->
+			<div class="pagination">
+				<div class="pagination-bullets"></div>
+			</div>
+		</main>
+
+		<div id="last-updated">
+			<span id="last-updated-time"></span>
+			<span id="last-updated-relative"></span>
+		</div>
+
+		<footer>
+			<button id="refresh-btn" class="bg-blue">Refresh</button>
+			<button id="reset-btn" class="bg-red">
+				Clear Extension Data & Re-authenticate
+			</button>
+			<button id="help-btn" class="bg-white">Contact Support</button>
+		</footer>
+
+		<script type="module" src="popup.js"></script>
+	</body>
+</html>
