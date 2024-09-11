@@ -186,6 +186,9 @@ const execAsync = promisify(exec);
 
 ## 5. Building the Extension
 
+> [!NOTE]
+> Update the version only on `package.json` - Vite will automatically update the version in `manifest.json` & `popup.html` during the build process.
+
 1. Run the build command:
    ```bash
    npm run build
@@ -227,5 +230,6 @@ const execAsync = promisify(exec);
 ## 9. Best Practices
 
 1. Use ES module syntax in all files except `content.js`
-2. Keep the build script updated if you add new files or change the project structure
-3. Regularly test the extension in Chrome to catch any issues early
+2. Update the version in `package.json` - Vite will automatically update the version in `manifest.json` & `popup.html` during the build process.
+3. Keep the build script updated if you add new files or change the project structure
+4. Regularly test the extension in Chrome to catch any issues early
