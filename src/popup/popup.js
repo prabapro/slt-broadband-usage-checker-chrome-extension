@@ -2,7 +2,8 @@ import { formatSubscriberId } from '../utils/helpers.js';
 import { sendPageView, sendEvent } from '../services/analytics.js';
 
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
-const HELP_URL = 'mailto:prabapro+chromeapps@gmail.com';
+const HELP_URL =
+	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/support';
 const CACHE_DURATION = 60 * 60 * 1000; // 60 minutes in milliseconds
 const USE_MOCK_DATA = false; // Set this to false to use real API data
 
