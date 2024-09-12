@@ -3,7 +3,7 @@
 	"name": "SLT Broadband Usage Checker (Unofficial)",
 	"version": "0.0.0",
 	"description": "Check SLT Broadband usage with a single click",
-	"permissions": ["storage", "webRequest", "scripting"],
+	"permissions": ["storage", "webRequest"],
 	"host_permissions": ["https://myslt.slt.lk/*", "https://omniscapp.slt.lk/*"],
 	"background": {
 		"service_worker": "background.js",
