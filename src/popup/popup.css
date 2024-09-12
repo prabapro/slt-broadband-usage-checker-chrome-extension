@@ -10,7 +10,7 @@ body {
 	font-family: 'Poppins', sans-serif;
 	width: 550px;
 	height: auto;
-	padding: 30px 30px 40px 30px;
+	padding: 20px 40px;
 	background-color: #d9e1e8;
 	/* background-image: linear-gradient(147deg, #f9fcff 0%, #dee4ea 74%); */
 	background-image: linear-gradient(97deg, #d9e1e8 0%, #d9e1e8 74%);
@@ -59,7 +59,7 @@ h1 sup {
 	font-size: 15px;
 	color: rgba(128, 128, 128, 0.626);
 	text-align: center;
-	padding: 10px 0;
+	margin: 15px 0;
 }
 
 main {
@@ -186,7 +186,7 @@ main {
 }
 
 footer {
-	margin-top: 30px;
+	margin-top: 20px;
 	display: inline-block;
 	text-align: center;
 }
@@ -197,36 +197,44 @@ button {
 	border-radius: 50px;
 	font-family: 'Poppins', sans-serif;
 	font-size: 14px;
+	font-weight: bold;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
 	margin: 0 3px;
+	box-shadow: 0 2px 4px rgba(166, 166, 166, 0.468);
 }
 
 .bg-blue {
-	background-color: #1565c0;
-	color: #fff;
+	border: 1px solid #1565c0;
+	color: #1565c0;
+	background-color: transparent;
+}
+
+.bg-green {
+	border: 1px solid #147848;
+	color: #147848;
+	background-color: transparent;
 }
 
 .bg-red {
-	background-color: #d63031;
-	color: #fff;
-}
-
-.bg-white {
-	background-color: #f5f5f5;
-	color: #333;
+	border: 1px solid #d63031;
+	color: #d63031;
+	background-color: transparent;
 }
 
 .bg-blue:hover {
 	background-color: #1976d2;
+	color: white;
+}
+
+.bg-green:hover {
+	background-color: #147848;
+	color: white;
 }
 
 .bg-red:hover {
 	background-color: #ae2626;
-}
-
-.bg-white:hover {
-	background-color: #cbcbecac;
+	color: white;
 }
 
 #last-updated {
@@ -265,9 +273,9 @@ button {
 	color: #1b5e20;
 }
 #welcome-screen {
-	margin: 30px 20px;
+	margin-top: 30px;
 	text-align: center;
-	padding: 40px;
+	padding: 30px 30px 40px 30px;
 	border-radius: 8px;
 	background-color: white;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -297,7 +305,7 @@ button {
 }
 
 .footer-links {
-	margin-top: 35px;
+	margin: 25px 0 20px 0;
 	text-align: center;
 }
 

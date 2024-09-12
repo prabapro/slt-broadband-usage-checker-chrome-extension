@@ -531,7 +531,7 @@ const updateUIForError = (showError) => {
 
 	const resetButton = document.getElementById('reset-btn');
 	if (resetButton) {
-		resetButton.textContent = 'Clear Extension Data & Re-authenticate';
+		resetButton.textContent = 'Clear Data & Re-authenticate';
 		resetButton.style.display = '';
 	}
 };
