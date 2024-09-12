@@ -2,8 +2,10 @@ import { formatSubscriberId } from '../utils/helpers.js';
 import { sendPageView, sendEvent } from '../services/analytics.js';
 
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
-const HELP_URL =
+const SUPPORT_URL =
 	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/support';
+const REVIEW_URL =
+	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/reviews';
 const CACHE_DURATION = 60 * 60 * 1000; // 60 minutes in milliseconds
 const USE_MOCK_DATA = false; // Set this to false to use real API data
 
@@ -113,9 +115,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		sendEvent('extension_reset', {}, __APP_VERSION__);
 		resetExtension();
 	});
-	document.getElementById('help-btn').addEventListener('click', () => {
-		sendEvent('help_clicked', {}, __APP_VERSION__);
-		openHelpPage();
+	document.getElementById('support-link').addEventListener('click', (e) => {
+		e.preventDefault();
+		openSupportPage();
+	});
+
+	document.getElementById('review-link').addEventListener('click', (e) => {
+		e.preventDefault();
+		openReviewPage();
 	});
 	checkAuthAndDisplay();
 
@@ -524,13 +531,8 @@ const updateUIForError = (showError) => {
 
 	const resetButton = document.getElementById('reset-btn');
 	if (resetButton) {
-		resetButton.textContent = 'Clear Data & Re-authenticate';
+		resetButton.textContent = 'Clear Extension Data & Re-authenticate';
 		resetButton.style.display = '';
-	}
-
-	const helpButton = document.getElementById('help-btn');
-	if (helpButton) {
-		helpButton.style.display = '';
 	}
 };
 
@@ -609,9 +611,14 @@ const showMessage = (message, type = 'info') => {
 	}
 };
 
-const openHelpPage = () => {
-	sendEvent('help_page_opened', {}, __APP_VERSION__);
-	chrome.tabs.create({ url: HELP_URL });
+const openSupportPage = () => {
+	sendEvent('support_page_opened', {}, __APP_VERSION__);
+	chrome.tabs.create({ url: SUPPORT_URL });
+};
+
+const openReviewPage = () => {
+	sendEvent('review_page_opened', {}, __APP_VERSION__);
+	chrome.tabs.create({ url: REVIEW_URL });
 };
 
 const getSubscriberId = () =>
