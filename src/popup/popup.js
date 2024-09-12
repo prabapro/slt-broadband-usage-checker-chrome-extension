@@ -1,4 +1,3 @@
-import { formatSubscriberId } from '../utils/helpers.js';
 import { sendPageView, sendEvent } from '../services/analytics.js';
 
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
@@ -12,6 +11,7 @@ const USE_MOCK_DATA = false; // Set this to false to use real API data
 // Mock data included directly in popup.js
 const mockData = {
 	reported_time: '10-Sep-2024 06:54 PM',
+	speed_status: 'NORMAL',
 	usage_data: [
 		{
 			claim: null,
@@ -281,6 +281,7 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 
 		const combinedData = {
 			reported_time: usageSummary.reported_time,
+			speed_status: usageSummary.speed_status,
 			usage_data: [
 				...usageSummary.usage_data,
 				...extraGB,
@@ -336,10 +337,19 @@ const displayUsageData = (data, subscriberId) => {
 	);
 };
 
+const formatAccountId = (accountId) => {
+	if (accountId.startsWith('94')) {
+		return '0' + accountId.slice(2);
+	}
+	return accountId;
+};
+
 const updateAccountInfo = (accountId) => {
 	const accountIdElement = document.getElementById('account-id');
 	if (accountIdElement) {
-		accountIdElement.textContent = `Account: ${formatSubscriberId(accountId)}`;
+		const formattedId = formatAccountId(accountId);
+		accountIdElement.textContent = `Account: ${formattedId}`;
+		console.log('Formatted Account ID:', formattedId);
 	}
 };
 
@@ -621,38 +631,6 @@ const openReviewPage = () => {
 	chrome.tabs.create({ url: REVIEW_URL });
 };
 
-const getSubscriberId = () =>
-	new Promise((resolve) => {
-		chrome.tabs.query({}, (tabs) => {
-			const mySltTab = tabs.find((tab) => tab.url?.includes('myslt.slt.lk'));
-			if (mySltTab) {
-				chrome.tabs.sendMessage(
-					mySltTab.id,
-					{ action: 'getSubscriberId' },
-					(response) => {
-						if (chrome.runtime.lastError) {
-							console.error(
-								'Error getting subscriberId:',
-								chrome.runtime.lastError
-							);
-							resolve(null);
-						} else if (response?.subscriberId) {
-							console.log('Retrieved subscriberId:', response.subscriberId);
-							chrome.storage.local.set({ subscriberId: response.subscriberId });
-							resolve(response.subscriberId);
-						} else {
-							console.log('No subscriberId in response');
-							resolve(null);
-						}
-					}
-				);
-			} else {
-				console.log('No MySLT tab found');
-				resolve(null);
-			}
-		});
-	});
-
 // Helper function to reduce repetition in fetch calls
 const fetchFromAPI = async (endpoint, authToken, sltClientId, subscriberId) => {
 	try {
@@ -693,6 +671,7 @@ const fetchUsageSummary = async (authToken, sltClientId, subscriberId) => {
 	);
 	return {
 		reported_time: data.dataBundle.reported_time,
+		speed_status: data.dataBundle.status,
 		usage_data: data.dataBundle.my_package_info.usageDetails.map((item) => ({
 			...item,
 			service_name: 'Main Pack',
