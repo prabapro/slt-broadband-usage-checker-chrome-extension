@@ -178,8 +178,12 @@ const showWelcomeScreen = () => {
 	document.body.insertBefore(welcomeScreen, mainContent);
 
 	document.getElementById('welcome-login-btn').addEventListener('click', () => {
-		sendEvent('welcome_login_clicked', {}, __APP_VERSION__);
-		chrome.tabs.create({ url: 'https://myslt.slt.lk/' });
+		chrome.runtime.sendMessage({
+			action: 'sendEvent',
+			eventName: 'welcome_login_clicked',
+			eventParams: {},
+			url: 'https://myslt.slt.lk/',
+		});
 	});
 
 	// Send page view event for welcome screen
@@ -617,7 +621,11 @@ const clearError = () => {
 
 const resetExtension = () => {
 	console.log('Clearing stored data and preparing to re-authenticate');
-	sendEvent('extension_reset', {}, __APP_VERSION__);
+	chrome.runtime.sendMessage({
+		action: 'sendEvent',
+		eventName: 'extension_reset',
+		eventParams: {},
+	});
 	showMessage('Clearing extension data...', 'info');
 
 	chrome.storage.local.remove(
@@ -631,14 +639,14 @@ const resetExtension = () => {
 		() => {
 			if (chrome.runtime.lastError) {
 				console.error('Error clearing data:', chrome.runtime.lastError);
-				sendEvent(
-					'error',
-					{
+				chrome.runtime.sendMessage({
+					action: 'sendEvent',
+					eventName: 'error',
+					eventParams: {
 						error_type: 'clear_data_error',
 						error_message: chrome.runtime.lastError.message,
 					},
-					__APP_VERSION__
-				);
+				});
 				showMessage('Error clearing data. Please try again.', 'error');
 			} else {
 				showMessage('Data cleared. Please re-authenticate.', 'success');
@@ -662,13 +670,21 @@ const showMessage = (message, type = 'info') => {
 };
 
 const openSupportPage = () => {
-	sendEvent('support_page_opened', {}, __APP_VERSION__);
-	chrome.tabs.create({ url: SUPPORT_URL });
+	chrome.runtime.sendMessage({
+		action: 'sendEvent',
+		eventName: 'support_page_opened',
+		eventParams: {},
+		url: SUPPORT_URL,
+	});
 };
 
 const openReviewPage = () => {
-	sendEvent('review_page_opened', {}, __APP_VERSION__);
-	chrome.tabs.create({ url: REVIEW_URL });
+	chrome.runtime.sendMessage({
+		action: 'sendEvent',
+		eventName: 'review_page_opened',
+		eventParams: {},
+		url: REVIEW_URL,
+	});
 };
 
 // Helper function to reduce repetition in fetch calls
