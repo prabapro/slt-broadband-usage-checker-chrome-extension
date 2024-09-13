@@ -325,7 +325,7 @@ const displayUsageData = (data, subscriberId) => {
 		return;
 	}
 
-	updateAccountInfo(subscriberId);
+	updateAccountInfo(subscriberId, data.speed_status);
 	createUsageDataGroups(data.usage_data);
 	updateLastUpdatedTime(data.reported_time);
 
@@ -344,12 +344,52 @@ const formatAccountId = (accountId) => {
 	return accountId;
 };
 
-const updateAccountInfo = (accountId) => {
+const updateAccountInfo = (accountId, speedStatus) => {
 	const accountIdElement = document.getElementById('account-id');
+	const speedStatusElement = document.getElementById('speed-status');
+
 	if (accountIdElement) {
 		const formattedId = formatAccountId(accountId);
 		accountIdElement.textContent = `Account: ${formattedId}`;
 		console.log('Formatted Account ID:', formattedId);
+	}
+
+	if (speedStatusElement && speedStatus) {
+		const formattedStatus = formatSpeedStatus(speedStatus);
+		speedStatusElement.textContent = formattedStatus;
+		speedStatusElement.className = `status-pill ${getStatusClass(speedStatus)}`;
+		console.log('Speed Status:', formattedStatus);
+
+		// Send GA4 event for speed status
+		sendEvent(
+			'speed_status_checked',
+			{
+				speed_status: speedStatus.toLowerCase(),
+			},
+			__APP_VERSION__
+		);
+	}
+};
+
+const formatSpeedStatus = (status) => {
+	status = status.toLowerCase();
+	if (status === 'normal') {
+		return 'Speed is Normal';
+	} else if (status === 'throttle' || status === 'throttled') {
+		return 'Speed is Throttled';
+	} else {
+		return status.charAt(0).toUpperCase() + status.slice(1);
+	}
+};
+
+const getStatusClass = (status) => {
+	status = status.toLowerCase();
+	if (status === 'normal') {
+		return 'status-normal';
+	} else if (status === 'throttle' || status === 'throttled') {
+		return 'status-throttled';
+	} else {
+		return 'status-other';
 	}
 };
 

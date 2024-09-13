@@ -55,11 +55,40 @@ h1 sup {
 	display: none;
 }
 
+#account-info {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+	margin: 15px 0;
+}
+
 #account-id {
 	font-size: 15px;
-	color: rgba(128, 128, 128, 0.626);
-	text-align: center;
-	margin: 15px 0;
+	color: gray;
+}
+
+.status-pill {
+	padding: 1px 10px;
+	border-radius: 10px;
+	font-size: 10px;
+	font-weight: 500;
+	text-transform: uppercase;
+}
+
+.status-normal {
+	background-color: #e8f5e9;
+	color: #1b5e20;
+}
+
+.status-throttled {
+	background-color: #fff3e0;
+	color: #e65100;
+}
+
+.status-other {
+	background-color: #e0e0e0;
+	color: #424242;
 }
 
 main {
