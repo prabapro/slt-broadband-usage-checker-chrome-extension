@@ -1,9 +1,5 @@
 import { formatSubscriberId } from '../utils/helpers.js';
-
-// Listen for installation
-chrome.runtime.onInstalled.addListener(() => {
-	console.log('Extension installed');
-});
+import './eventHandler.js';
 
 chrome.webRequest.onBeforeRequest.addListener(
 	(details) => {
