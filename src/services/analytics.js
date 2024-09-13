@@ -1,5 +1,3 @@
-// analytics.js
-
 const GA4_MEASUREMENT_ID = __GA4_MEASUREMENT_ID__;
 const GA4_API_SECRET = __GA4_API_SECRET__;
 const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
@@ -63,7 +61,7 @@ async function sendPageView(pageTitle, pageLocation, version) {
 					engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
 					page_title: pageTitle,
 					page_location: pageLocation,
-					app_version: version, // Add the version to the page_view event
+					app_version: version,
 				},
 			},
 		],
@@ -99,7 +97,7 @@ async function sendEvent(name, params = {}, version) {
 					...params,
 					session_id: sessionId,
 					engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
-					app_version: version, // Add the version to all events
+					app_version: version,
 				},
 			},
 		],

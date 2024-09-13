@@ -1,8 +1,28 @@
+import { sendEvent } from '../services/analytics.js';
 import { formatSubscriberId } from '../utils/helpers.js';
 
 // Listen for installation
-chrome.runtime.onInstalled.addListener(() => {
-	console.log('Extension installed');
+chrome.runtime.onInstalled.addListener((details) => {
+	if (details.reason === 'install') {
+		console.log('Extension installed');
+		sendEvent(
+			'extension_installed',
+			{
+				install_type: 'new',
+			},
+			chrome.runtime.getManifest().version
+		);
+	} else if (details.reason === 'update') {
+		console.log('Extension updated');
+		sendEvent(
+			'extension_updated',
+			{
+				previous_version: details.previousVersion,
+				current_version: chrome.runtime.getManifest().version,
+			},
+			chrome.runtime.getManifest().version
+		);
+	}
 });
 
 chrome.webRequest.onBeforeRequest.addListener(
