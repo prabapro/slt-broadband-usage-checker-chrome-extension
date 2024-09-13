@@ -359,6 +359,15 @@ const updateAccountInfo = (accountId, speedStatus) => {
 		speedStatusElement.textContent = formattedStatus;
 		speedStatusElement.className = `status-pill ${getStatusClass(speedStatus)}`;
 		console.log('Speed Status:', formattedStatus);
+
+		// Send GA4 event for speed status
+		sendEvent(
+			'speed_status_checked',
+			{
+				speed_status: speedStatus.toLowerCase(),
+			},
+			__APP_VERSION__
+		);
 	}
 };
 
