@@ -74,18 +74,19 @@
 
    ```bash
    # Create directories
-   mkdir -p src/{background,content,popup,utils} public/images dist_zip
+   mkdir -p src/{background,content,popup,services,utils} public/images dist_zip
 
    # Create empty files
-   touch src/background/background.js \
+   touch src/background/{background.js,eventHandler.js} \
          src/content/content.js \
          src/popup/{popup.html,popup.js,popup.css} \
+         src/services/analytics.js \
          src/utils/helpers.js \
          public/manifest.json \
          build.js \
          vite.config.js
 
-   # Create placeholder image files (you'll need to replace these with actual icons)
+   # Create placeholder image files (replace these with actual icons)
    touch public/images/{icon16.png,icon32.png,icon48.png,icon128.png}
    ```
 
@@ -97,24 +98,27 @@
    ```
    .
    ├── build.js
-   ├── dist_zip
    ├── package.json
    ├── public
    │   ├── images
    │   │   ├── icon128.png
    │   │   ├── icon16.png
    │   │   ├── icon32.png
-   │   │   └── icon48.png
+   │   │   ├── icon48.png
+   │   │   └── slt-logo.png
    │   └── manifest.json
    ├── src
    │   ├── background
-   │   │   └── background.js
+   │   │   ├── background.js
+   │   │   └── eventHandler.js
    │   ├── content
    │   │   └── content.js
    │   ├── popup
    │   │   ├── popup.css
    │   │   ├── popup.html
    │   │   └── popup.js
+   │   ├── services
+   │   │   └── analytics.js
    │   └── utils
    │       └── helpers.js
    └── vite.config.js
@@ -128,13 +132,16 @@ Your project should have the following directory structure:
 slt-bb-usage-checker/
 ├── src/
 │   ├── background/
-│   │   └── background.js
+│   │   ├── background.js
+│   │   ├── eventHandler.js
 │   ├── content/
 │   │   └── content.js
 │   ├── popup/
 │   │   ├── popup.html
 │   │   ├── popup.js
 │   │   └── popup.css
+│   ├── services/
+│   │   └── analytics.js
 │   └── utils/
 │       └── helpers.js
 ├── public/
@@ -156,32 +163,6 @@ slt-bb-usage-checker/
 > - The `dist` folder will be created during the build process and will contain your compiled extension.
 > - The `dist_zip` folder will contain zipped versions of your built extension, ready for distribution.
 > - Ensure that `dist/` and `dist_zip/` are added to your `.gitignore` file.
-
-## 2. Project Structure
-
-Create the following directory structure:
-
-```
-project-root/
-├── src/
-│   ├── background/
-│   │   └── background.js
-│   ├── content/
-│   │   └── content.js
-│   ├── popup/
-│   │   ├── popup.html
-│   │   ├── popup.js
-│   │   └── popup.css
-│   └── utils/
-│       └── helpers.js
-├── public/
-│   ├── manifest.json
-│   └── images/
-│       └── (extension icons)
-├── build.js
-├── vite.config.js
-└── package.json
-```
 
 ## 3. Configuration Files
 
@@ -241,7 +222,7 @@ const execAsync = promisify(exec);
 
 ```
 
-### 4.2 Implement `background.js`:
+### 4.2 Implement `background.js` & `eventHandler.js`:
 
 - Use ES module syntax
 - Implement necessary background script functionality
@@ -268,6 +249,10 @@ const execAsync = promisify(exec);
 ### 4.7 Create `helpers.js` in the `utils` folder:
 
 - Implement shared utility functions
+
+### 4.8 Create `analytics.js` in the `services` folder:
+
+- Implement Google Analytics events
 
 ## 5. Building the Extension
 
@@ -311,6 +296,7 @@ const execAsync = promisify(exec);
    ├── assets/
    ├── background.js
    ├── content.js
+   ├── eventHandlers.js
    ├── manifest.json
    ├── popup.css
    ├── popup.html
