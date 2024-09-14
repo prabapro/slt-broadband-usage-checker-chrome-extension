@@ -342,3 +342,71 @@ const execAsync = promisify(exec);
 2. Update the version in `package.json` - Vite will automatically update the version in `manifest.json` & `popup.html` during the build process.
 3. Keep the build script updated if you add new files or change the project structure
 4. Regularly test the extension in Chrome to catch any issues early
+
+---
+
+# 📊 Google Analytics Events
+
+This extension uses Google Analytics 4 (GA4) [Measurement Protocol](https://developers.google.com/analytics/devguides/collection/protocol/ga4) to track various events for usage analysis and improvement purposes. Below is a comprehensive table of all events and their parameters:
+
+| Event Name              | Description                                                       | Parameters                                                                                              |
+| ----------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `page_view`             | Fired when a page is viewed                                       | `page_title`: string<br>`page_location`: string<br>`app_version`: string                                |
+| extension_installed     | Fired when the extension is first installed                       | `install_type`: `new`                                                                                   |
+| `extension_updated`     | Fired when the extension is updated                               | `previous_version`: string<br>`current_version`: string                                                 |
+| `extension_reset`       | Fired when the user resets the extension                          | No additional parameters                                                                                |
+| `refresh_clicked`       | Fired when the user clicks the refresh button                     | No additional parameters                                                                                |
+| `support_page_opened`   | Fired when the user opens the support page                        | No additional parameters                                                                                |
+| `review_page_opened`    | Fired when the user opens the review page                         | No additional parameters                                                                                |
+| `welcome_login_clicked` | Fired when the user clicks the login button on the welcome screen | No additional parameters                                                                                |
+| `usage_checked`         | Fired when the usage data is checked                              | `data_source`: `cache` or `api`                                                                         |
+| `group_viewed`          | Fired when a usage data group is viewed                           | `group_name`: string<br>`band_name`: string                                                             |
+| `speed_status_checked`  | Fired when the speed status is checked                            | `speed_status`: string (`normal`, `throttled` etc)                                                      |
+| `error`                 | Fired when an error occurs                                        | `error_type`: string<br>`error_message`: string (optional)<br>`endpoint`: string (for API fetch errors) |
+
+Common parameters included in all events:
+
+- `session_id`: string
+- `engagement_time_msec`: number (default: 100)
+- `app_version`: string (current extension version)
+
+## Notes on Analytics Events
+
+1. The `app_version` is automatically included in all events.
+2. The `session_id` and `engagement_time_msec` are handled by the analytics service and included in all events.
+3. Some events (like `extension_reset`) don't have additional parameters beyond the common ones.
+4. The `error` event can have different parameters depending on the type of error.
+
+## Maintaining Analytics
+
+- **Consistency**: Ensure that the event names and parameters used in the code match exactly with what's listed in this table.
+- **Documentation**: Keep this table updated as part of the project documentation. Update it when adding new features or modifying existing ones.
+- **GA4 Configuration**: Use this table as a reference when setting up custom definitions in your GA4 property.
+- **Future Planning**: When planning new features, use this table to identify if you need to add new events or modify existing ones.
+- **Debugging**: Use this table as a quick reference when debugging analytics issues.
+
+## Debugging Analytics Events
+
+To debug analytics events in the popup and service worker:
+
+1. For popup events:
+
+   - Open the extension popup
+   - Right-click and select "Inspect" to open Chrome DevTools
+   - In the Console tab, you'll see logs for each event being sent
+
+2. For service worker events:
+
+   - Go to `chrome://extensions`
+   - Find your extension and click on "Inspect views: service worker"
+   - In the Console tab, you'll see logs for events handled by the service worker
+
+3. Enable GA4 DebugView:
+
+   > [!WARNING] Remove any debug code or console logs before publishing the extension.
+
+   - In your GA4 property, go to Admin > DebugView
+   - In your extension's background script, add `&debug_mode=1` to the `GA4_ENDPOINT URL`
+   - Events will now appear in real-time in the DebugView
+
+4. Use the Network tab in DevTools to inspect the actual requests being sent to GA4. Look for requests to `www.google-analytics.com`.
