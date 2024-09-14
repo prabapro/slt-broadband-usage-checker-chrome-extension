@@ -6,6 +6,9 @@ const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id
 const SESSION_EXPIRATION_IN_MIN = 30;
 const DEFAULT_ENGAGEMENT_TIME_IN_MSEC = 100;
 
+// The display version will be injected by Vite
+const DISPLAY_VERSION = __APP_VERSION__;
+
 // Generate a unique client ID for each extension installation
 function getOrCreateClientId() {
 	return new Promise((resolve) => {
@@ -50,7 +53,6 @@ async function getOrCreateSessionId() {
 
 // Send page view event to GA4
 async function sendPageView(pageTitle, pageLocation) {
-	const version = chrome.runtime.getManifest().version;
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
@@ -64,7 +66,7 @@ async function sendPageView(pageTitle, pageLocation) {
 					engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
 					page_title: pageTitle,
 					page_location: pageLocation,
-					app_version: version,
+					app_version: DISPLAY_VERSION,
 				},
 			},
 		],
@@ -80,7 +82,9 @@ async function sendPageView(pageTitle, pageLocation) {
 			throw new Error('GA4 page_view request failed');
 		}
 
-		console.log('Page view sent to GA4:', pageTitle, { app_version: version });
+		console.log('Page view sent to GA4:', pageTitle, {
+			app_version: DISPLAY_VERSION,
+		});
 	} catch (error) {
 		console.error('Error sending page view to GA4:', error);
 	}
@@ -88,7 +92,6 @@ async function sendPageView(pageTitle, pageLocation) {
 
 // Send event to GA4
 async function sendEvent(name, params = {}) {
-	const version = chrome.runtime.getManifest().version;
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
@@ -101,7 +104,7 @@ async function sendEvent(name, params = {}) {
 					...params,
 					session_id: sessionId,
 					engagement_time_msec: DEFAULT_ENGAGEMENT_TIME_IN_MSEC,
-					app_version: version,
+					app_version: DISPLAY_VERSION,
 				},
 			},
 		],
@@ -119,7 +122,7 @@ async function sendEvent(name, params = {}) {
 
 		console.log('Event sent to GA4:', name, {
 			...params,
-			app_version: version,
+			app_version: DISPLAY_VERSION,
 		});
 	} catch (error) {
 		console.error('Error sending event to GA4:', error);
