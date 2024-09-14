@@ -1,3 +1,5 @@
+// src/background/background.js
+
 import { formatSubscriberId } from '../utils/helpers.js';
 import './eventHandler.js';
 

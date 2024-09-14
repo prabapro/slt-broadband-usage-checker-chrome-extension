@@ -1,3 +1,5 @@
+// src/background/eventHandler.js
+
 import { sendPageView, sendEvent } from '../services/analytics.js';
 
 chrome.runtime.onInstalled.addListener((details) => {

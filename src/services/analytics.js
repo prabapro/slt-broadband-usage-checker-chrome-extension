@@ -1,3 +1,5 @@
+// src/services/analytics.js
+
 const GA4_MEASUREMENT_ID = __GA4_MEASUREMENT_ID__;
 const GA4_API_SECRET = __GA4_API_SECRET__;
 const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;

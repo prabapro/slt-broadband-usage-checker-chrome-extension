@@ -13,6 +13,10 @@ export default defineConfig({
 		__APP_VERSION__: JSON.stringify(version),
 		__GA4_MEASUREMENT_ID__: JSON.stringify(process.env.GA4_MEASUREMENT_ID),
 		__GA4_API_SECRET__: JSON.stringify(process.env.GA4_API_SECRET),
+		__USE_MOCK_DATA__:
+			process.env.NODE_ENV === 'production'
+				? false
+				: process.env.USE_MOCK_DATA === 'true',
 	},
 	build: {
 		outDir: 'dist',
@@ -48,12 +52,12 @@ export default defineConfig({
 			},
 		},
 		{
-			name: 'copy-helpers',
+			name: 'copy-utils',
 			writeBundle() {
-				const srcPath = resolve(__dirname, 'src/utils/helpers.js');
-				const destPath = resolve(__dirname, 'dist/shared/helpers.js');
-				fs.ensureDirSync(resolve(__dirname, 'dist/shared'));
-				fs.copyFileSync(srcPath, destPath);
+				const srcPath = resolve(__dirname, 'src/utils');
+				const destPath = resolve(__dirname, 'dist/shared');
+				fs.ensureDirSync(destPath);
+				fs.copySync(srcPath, destPath);
 			},
 		},
 	],

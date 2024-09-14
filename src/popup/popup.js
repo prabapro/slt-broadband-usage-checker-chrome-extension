@@ -1,4 +1,24 @@
-const USE_MOCK_DATA = false; // Set this to false to use real API data
+// src/popup/popup.js
+
+import {
+	formatAccountId,
+	formatSpeedStatus,
+	getStatusClass,
+	createDataGroup,
+} from '../utils/helpers.js';
+
+const USE_MOCK_DATA = __USE_MOCK_DATA__;
+
+let mockData;
+if (USE_MOCK_DATA) {
+	console.log('Mock data is enabled');
+	import('../utils/mockData.js').then((module) => {
+		mockData = module.mockData;
+	});
+} else {
+	console.log('Using real API data');
+}
+
 const MINUTES_IN_MS = 60 * 1000; // 1 minute in milliseconds
 const CACHE_DURATION = 15 * MINUTES_IN_MS; // 5 minutes in milliseconds
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
@@ -7,105 +27,6 @@ const SUPPORT_URL =
 const REVIEW_URL =
 	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/reviews';
 
-// Mock data included directly in popup.js
-const mockData = {
-	reported_time: '10-Sep-2024 06:54 PM',
-	speed_status: 'NORMAL',
-	usage_data: [
-		{
-			claim: null,
-			expiry_date: '30-Sep',
-			fetched_from: '/UsageSummary',
-			limit: '440.0',
-			name: 'Standard',
-			percentage: 0,
-			remaining: '0',
-			service_name: 'Main Pack',
-			subscriptionid: null,
-			timestamp: 0,
-			unsubscribable: false,
-			used: '442.3',
-			volume_unit: 'GB',
-		},
-		{
-			claim: null,
-			expiry_date: '30-Sep',
-			fetched_from: '/UsageSummary',
-			limit: '660.0',
-			name: 'Total (Standard + Free)',
-			percentage: 70,
-			remaining: '700.0',
-			service_name: 'Main Pack',
-			subscriptionid: null,
-			timestamp: 0,
-			unsubscribable: false,
-			used: '323.8',
-			volume_unit: 'GB',
-		},
-		{
-			claim: null,
-			expiry_date: '01-Oct',
-			fetched_from: '/BonusData',
-			limit: 6,
-			name: 'Loyalty',
-			percentage: 0,
-			remaining: 0,
-			service_name: 'Bonus Data',
-			subscriptionid: null,
-			timestamp: 0,
-			unsubscribable: false,
-			used: 6,
-			volume_unit: 'GB',
-		},
-		{
-			claim: null,
-			expiry_date: '05-Oct',
-			fetched_from: '/ExtraGB',
-			limit: 1024,
-			name: 'My Extra GB',
-			percentage: 50,
-			remaining: 0,
-			service_name: 'Extra GB',
-			subscriptionid: null,
-			timestamp: 0,
-			unsubscribable: false,
-			used: 1024,
-			volume_unit: 'MB',
-		},
-		{
-			claim: null,
-			expiry_date: '10-Oct',
-			fetched_from: '/GetDashboardVASBundles',
-			limit: 20,
-			name: '20 GB Add-on',
-			percentage: 40,
-			remaining: 12,
-			service_name: 'Add-Ons Data',
-			subscriptionid: null,
-			timestamp: 0,
-			unsubscribable: false,
-			used: 8,
-			volume_unit: 'GB',
-		},
-		{
-			claim: null,
-			expiry_date: '10-Oct',
-			fetched_from: '/FreeData',
-			limit: 3,
-			name: '3GB Free Data',
-			percentage: 50,
-			remaining: 1.5,
-			service_name: 'Free Data',
-			subscriptionid: null,
-			timestamp: 0,
-			unsubscribable: false,
-			used: 1.5,
-			volume_unit: 'GB',
-		},
-	],
-};
-
-// Update the sendPageView function
 const sendPageView = (pageTitle) => {
 	chrome.runtime.sendMessage({
 		action: 'sendPageView',
@@ -114,7 +35,6 @@ const sendPageView = (pageTitle) => {
 	});
 };
 
-// Update the sendEvent function
 const sendEvent = (eventName, eventParams = {}) => {
 	chrome.runtime.sendMessage({
 		action: 'sendEvent',
@@ -353,13 +273,6 @@ const displayUsageData = (data, subscriberId) => {
 	sendPageView('SLT Usage Data Screen');
 };
 
-const formatAccountId = (accountId) => {
-	if (accountId.startsWith('94')) {
-		return '0' + accountId.slice(2);
-	}
-	return accountId;
-};
-
 const updateAccountInfo = (accountId, speedStatus) => {
 	const accountIdElement = document.getElementById('account-id');
 	const speedStatusElement = document.getElementById('speed-status');
@@ -380,28 +293,6 @@ const updateAccountInfo = (accountId, speedStatus) => {
 		sendEvent('speed_status_checked', {
 			speed_status: speedStatus.toLowerCase(),
 		});
-	}
-};
-
-const formatSpeedStatus = (status) => {
-	status = status.toLowerCase();
-	if (status === 'normal') {
-		return 'Speed is Normal';
-	} else if (status === 'throttle' || status === 'throttled') {
-		return 'Speed is Throttled';
-	} else {
-		return status.charAt(0).toUpperCase() + status.slice(1);
-	}
-};
-
-const getStatusClass = (status) => {
-	status = status.toLowerCase();
-	if (status === 'normal') {
-		return 'status-normal';
-	} else if (status === 'throttle' || status === 'throttled') {
-		return 'status-throttled';
-	} else {
-		return 'status-other';
 	}
 };
 
@@ -443,70 +334,6 @@ const createUsageDataGroups = (usageData) => {
 			band_name: initialGroup.dataset.bandName,
 		});
 	}
-};
-
-const createDataGroup = (serviceName, items) => {
-	const group = document.createElement('div');
-	group.className = 'data-group';
-	group.innerHTML = `<h2>${serviceName}</h2>`;
-
-	items.forEach((item) => {
-		group.appendChild(createProgressBar(item));
-	});
-
-	return group;
-};
-
-const createProgressBar = (data) => {
-	const usedAmount = parseFloat(data.used);
-	const totalAmount = parseFloat(data.limit);
-	const usedPercentage = (usedAmount / totalAmount) * 100;
-	const remainingPercentage = Math.max(0, 100 - usedPercentage);
-
-	const progressBar = document.createElement('div');
-	progressBar.className = 'progress-bar';
-
-	const isExceeded = usedAmount >= totalAmount;
-	const statusText = isExceeded
-		? 'Quota exceeded'
-		: remainingPercentage === 0
-		? 'Quota fully used'
-		: `${remainingPercentage.toFixed(1)}% remaining till ${data.expiry_date}`;
-
-	const fillClass = isExceeded
-		? 'fill-exceeded'
-		: usedPercentage < 25
-		? 'fill-low'
-		: usedPercentage < 50
-		? 'fill-medium'
-		: usedPercentage < 75
-		? 'fill-high'
-		: 'fill-very-high';
-
-	progressBar.innerHTML = `
-    <h3>${data.name}</h3>
-    <div class="bar">
-      <div class="fill ${fillClass}" style="width: ${Math.min(
-		usedPercentage,
-		100
-	)}%"></div>
-    </div>
-    <div class="progress-info">
-      <span>
-        <span class="usage-amount">${usedAmount.toFixed(1)} ${
-		data.volume_unit
-	}</span> / 
-        <span class="total-amount">${totalAmount.toFixed(1)} ${
-		data.volume_unit
-	}</span>
-      </span>
-      <span class="status-text ${
-				isExceeded ? 'exceeded' : ''
-			}">${statusText}</span>
-    </div>
-  `;
-
-	return progressBar;
 };
 
 const updatePagination = () => {

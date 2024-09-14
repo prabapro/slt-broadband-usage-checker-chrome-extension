@@ -5,6 +5,9 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { build as viteBuild } from 'vite';
 import archiver from 'archiver';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,10 +36,24 @@ async function build() {
 
 	console.log(`Building version ${version}...`);
 
+	// Determine if this is a production build
+	const isProduction = process.env.NODE_ENV === 'production';
+	console.log(`Build type: ${isProduction ? 'Production' : 'Development'}`);
+
+	// Determine whether to use mock data
+	const useMockData = isProduction
+		? false
+		: process.env.USE_MOCK_DATA === 'true';
+	console.log(`Using mock data: ${useMockData}`);
+
 	// Run Vite build
 	console.log('Running Vite build...');
 	try {
-		await viteBuild();
+		await viteBuild({
+			define: {
+				__USE_MOCK_DATA__: useMockData,
+			},
+		});
 	} catch (error) {
 		console.error('Vite build failed:', error);
 		process.exit(1);
@@ -90,16 +107,21 @@ async function build() {
 
 	console.log(`Build for version ${version} completed successfully!`);
 
-	// Create dist_zip folder if it doesn't exist
-	const distZipDir = path.resolve(__dirname, 'dist_zip');
-	await fs.ensureDir(distZipDir);
+	// Create zip file only for production builds
+	if (isProduction) {
+		// Create dist_zip folder if it doesn't exist
+		const distZipDir = path.resolve(__dirname, 'dist_zip');
+		await fs.ensureDir(distZipDir);
 
-	// Zip the dist folder
-	const zipFileName = `release_v${version}.zip`;
-	const zipFilePath = path.join(distZipDir, zipFileName);
-	console.log(`Creating ${zipFileName} in dist_zip folder...`);
-	await zipDirectory(distDir, zipFilePath);
-	console.log(`${zipFileName} created successfully in dist_zip folder!`);
+		// Zip the dist folder
+		const zipFileName = `release_v${version}.zip`;
+		const zipFilePath = path.join(distZipDir, zipFileName);
+		console.log(`Creating ${zipFileName} in dist_zip folder...`);
+		await zipDirectory(distDir, zipFilePath);
+		console.log(`${zipFileName} created successfully in dist_zip folder!`);
+	} else {
+		console.log('Skipping zip file creation for development build.');
+	}
 }
 
 build().catch(console.error);
