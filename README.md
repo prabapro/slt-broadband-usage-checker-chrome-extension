@@ -403,7 +403,8 @@ To debug analytics events in the popup and service worker:
 
 3. Enable GA4 DebugView:
 
-   > [!WARNING] Remove any debug code or console logs before publishing the extension.
+   > [!IMPORTANT]
+   > Remove any debug code or console logs before publishing the extension.
 
    - In your GA4 property, go to Admin > DebugView
    - In your extension's background script, add `&debug_mode=1` to the `GA4_ENDPOINT URL`
