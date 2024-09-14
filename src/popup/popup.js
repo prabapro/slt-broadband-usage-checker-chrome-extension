@@ -166,12 +166,14 @@ const checkAuthAndDisplay = async () => {
 
 const showWelcomeScreen = () => {
 	const mainContent = document.querySelector('main');
+	const accountInfo = document.getElementById('account-info');
 	const accountId = document.getElementById('account-id');
 	const lastUpdated = document.getElementById('last-updated');
 	const refreshBtn = document.getElementById('refresh-btn');
 	const resetBtn = document.getElementById('reset-btn');
 
 	if (mainContent) mainContent.style.display = 'none';
+	if (accountInfo) accountInfo.style.display = 'none';
 	if (accountId) accountId.style.display = 'none';
 	if (lastUpdated) lastUpdated.style.display = 'none';
 	if (refreshBtn) refreshBtn.style.display = 'none';
