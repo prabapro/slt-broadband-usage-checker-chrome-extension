@@ -1,3 +1,5 @@
+// src/content/content.js
+
 function formatSubscriberId(id) {
 	if (id.startsWith('0')) {
 		return '94' + id.substring(1);

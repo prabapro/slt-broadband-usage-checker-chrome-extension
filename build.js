@@ -1,15 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { build as viteBuild } from 'vite';
 import archiver from 'archiver';
+import dotenv from 'dotenv';
+import { minify } from 'html-minifier-terser';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const execAsync = promisify(exec);
 
 async function zipDirectory(sourceDir, outPath) {
 	const archive = archiver('zip', { zlib: { level: 9 } });
@@ -26,17 +26,95 @@ async function zipDirectory(sourceDir, outPath) {
 	});
 }
 
+function logBuildInfo(
+	isProduction,
+	useMockData,
+	displayVersion,
+	manifestVersion
+) {
+	const buildType = isProduction ? 'Production' : 'Development';
+	const mockDataStatus = isProduction ? 'N/A' : useMockData ? 'Yes' : 'No';
+
+	console.log('\n');
+	console.log('='.repeat(50));
+	console.log('Build Configuration');
+	console.log('='.repeat(50));
+	console.table({
+		'Build Type': buildType,
+		'Using Mock Data': mockDataStatus,
+		'Display Version': displayVersion,
+		'Manifest Version': manifestVersion,
+	});
+	console.log('='.repeat(50));
+	console.log('\n');
+}
+
+async function cleanupFiles(distDir, isProduction) {
+	console.log('Cleaning up unnecessary files...');
+
+	// Remove unhashed helpers.js if it exists
+	const unhashedHelpersPath = path.join(distDir, 'helpers.js');
+	if (await fs.pathExists(unhashedHelpersPath)) {
+		await fs.remove(unhashedHelpersPath);
+		console.log('Removed unhashed helpers.js');
+	}
+
+	// Remove mockData.js in production
+	if (isProduction) {
+		const mockDataPath = path.join(distDir, 'shared', 'mockData.js');
+		if (await fs.pathExists(mockDataPath)) {
+			await fs.remove(mockDataPath);
+			console.log('Removed mockData.js');
+		}
+	}
+
+	// Remove src directory if it exists
+	const srcDir = path.join(distDir, 'src');
+	if (await fs.pathExists(srcDir)) {
+		await fs.remove(srcDir);
+		console.log('Removed src directory');
+	}
+
+	// Remove duplicate popup.css from root
+	const rootPopupCssPath = path.join(distDir, 'popup.css');
+	if (await fs.pathExists(rootPopupCssPath)) {
+		await fs.remove(rootPopupCssPath);
+		console.log('Removed duplicate popup.css from root');
+	}
+}
+
+async function minifyHtml(htmlContent) {
+	const minifyOptions = {
+		collapseWhitespace: true,
+		removeComments: true,
+		removeRedundantAttributes: true,
+		removeScriptTypeAttributes: true,
+		removeStyleLinkTypeAttributes: true,
+		useShortDoctype: true,
+		minifyCSS: true,
+		minifyJS: true,
+	};
+
+	return await minify(htmlContent, minifyOptions);
+}
+
 async function build() {
-	// Get version from package.json
 	const packageJson = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
-	const version = packageJson.version;
+	const baseVersion = packageJson.version;
 
-	console.log(`Building version ${version}...`);
+	const isProduction = process.env.NODE_ENV === 'production';
+	const useMockData = !isProduction && process.env.USE_MOCK_DATA === 'true';
+	const displayVersion = isProduction ? baseVersion : `${baseVersion}-dev`;
 
-	// Run Vite build
+	console.log(`Building version ${displayVersion}...`);
+
+	logBuildInfo(isProduction, useMockData, displayVersion, baseVersion);
+
 	console.log('Running Vite build...');
 	try {
-		await viteBuild();
+		await viteBuild({
+			mode: isProduction ? 'production' : 'development',
+		});
 	} catch (error) {
 		console.error('Vite build failed:', error);
 		process.exit(1);
@@ -45,25 +123,18 @@ async function build() {
 	const distDir = path.resolve(__dirname, 'dist');
 
 	// Move popup.html to the correct location
-	console.log('Moving popup.html...');
+	console.log('Moving and minifying popup.html...');
 	const wrongPopupPath = path.join(distDir, 'src', 'popup', 'popup.html');
 	const correctPopupPath = path.join(distDir, 'popup.html');
 	if (await fs.pathExists(wrongPopupPath)) {
-		await fs.move(wrongPopupPath, correctPopupPath, { overwrite: true });
-	}
-
-	// Update version in popup.html
-	console.log('Updating version in popup.html...');
-	let popupHtml = await fs.readFile(correctPopupPath, 'utf-8');
-	popupHtml = popupHtml.replace(/v\d+\.\d+\.\d+/g, `v${version}`);
-	await fs.writeFile(correctPopupPath, popupHtml);
-
-	// Ensure popup.css is in the correct location
-	console.log('Copying popup.css...');
-	const srcCssPath = path.resolve(__dirname, 'src', 'popup', 'popup.css');
-	const distCssPath = path.join(distDir, 'popup.css');
-	if (await fs.pathExists(srcCssPath)) {
-		await fs.copy(srcCssPath, distCssPath, { overwrite: true });
+		let popupHtml = await fs.readFile(wrongPopupPath, 'utf-8');
+		popupHtml = popupHtml.replace(
+			/v\d+\.\d+\.\d+(-dev)?/g,
+			`v${displayVersion}`
+		);
+		popupHtml = await minifyHtml(popupHtml);
+		await fs.writeFile(correctPopupPath, popupHtml);
+		await fs.remove(wrongPopupPath);
 	}
 
 	// Copy and update manifest
@@ -71,7 +142,7 @@ async function build() {
 	const manifestSrcPath = path.resolve(__dirname, 'public', 'manifest.json');
 	const manifestDestPath = path.join(distDir, 'manifest.json');
 	let manifest = JSON.parse(await fs.readFile(manifestSrcPath, 'utf-8'));
-	manifest.version = version;
+	manifest.version = baseVersion; // Always use the base version for manifest
 	await fs.writeJson(manifestDestPath, manifest, { spaces: 2 });
 
 	// Copy images
@@ -81,25 +152,24 @@ async function build() {
 		path.join(distDir, 'images')
 	);
 
-	// Clean up unnecessary directories
-	console.log('Cleaning up...');
-	const srcDir = path.join(distDir, 'src');
-	if (await fs.pathExists(srcDir)) {
-		await fs.remove(srcDir);
+	// Clean up unnecessary files
+	await cleanupFiles(distDir, isProduction);
+
+	console.log(`Build for version ${displayVersion} completed successfully!`);
+
+	// Create zip file only for production builds
+	if (isProduction) {
+		const distZipDir = path.resolve(__dirname, 'dist_zip');
+		await fs.ensureDir(distZipDir);
+
+		const zipFileName = `release_v${baseVersion}.zip`;
+		const zipFilePath = path.join(distZipDir, zipFileName);
+		console.log(`Creating ${zipFileName} in dist_zip folder...`);
+		await zipDirectory(distDir, zipFilePath);
+		console.log(`${zipFileName} created successfully in dist_zip folder!`);
+	} else {
+		console.log('Skipping zip file creation for development build.');
 	}
-
-	console.log(`Build for version ${version} completed successfully!`);
-
-	// Create dist_zip folder if it doesn't exist
-	const distZipDir = path.resolve(__dirname, 'dist_zip');
-	await fs.ensureDir(distZipDir);
-
-	// Zip the dist folder
-	const zipFileName = `release_v${version}.zip`;
-	const zipFilePath = path.join(distZipDir, zipFileName);
-	console.log(`Creating ${zipFileName} in dist_zip folder...`);
-	await zipDirectory(distDir, zipFilePath);
-	console.log(`${zipFileName} created successfully in dist_zip folder!`);
 }
 
 build().catch(console.error);
