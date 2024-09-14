@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { build as viteBuild } from 'vite';
 import archiver from 'archiver';
 import dotenv from 'dotenv';
+import { minify } from 'html-minifier-terser';
 
 dotenv.config();
 
@@ -73,6 +74,28 @@ async function cleanupFiles(distDir, isProduction) {
 		await fs.remove(srcDir);
 		console.log('Removed src directory');
 	}
+
+	// Remove duplicate popup.css from root
+	const rootPopupCssPath = path.join(distDir, 'popup.css');
+	if (await fs.pathExists(rootPopupCssPath)) {
+		await fs.remove(rootPopupCssPath);
+		console.log('Removed duplicate popup.css from root');
+	}
+}
+
+async function minifyHtml(htmlContent) {
+	const minifyOptions = {
+		collapseWhitespace: true,
+		removeComments: true,
+		removeRedundantAttributes: true,
+		removeScriptTypeAttributes: true,
+		removeStyleLinkTypeAttributes: true,
+		useShortDoctype: true,
+		minifyCSS: true,
+		minifyJS: true,
+	};
+
+	return await minify(htmlContent, minifyOptions);
 }
 
 async function build() {
@@ -100,25 +123,18 @@ async function build() {
 	const distDir = path.resolve(__dirname, 'dist');
 
 	// Move popup.html to the correct location
-	console.log('Moving popup.html...');
+	console.log('Moving and minifying popup.html...');
 	const wrongPopupPath = path.join(distDir, 'src', 'popup', 'popup.html');
 	const correctPopupPath = path.join(distDir, 'popup.html');
 	if (await fs.pathExists(wrongPopupPath)) {
-		await fs.move(wrongPopupPath, correctPopupPath, { overwrite: true });
-	}
-
-	// Update version in popup.html
-	console.log('Updating version in popup.html...');
-	let popupHtml = await fs.readFile(correctPopupPath, 'utf-8');
-	popupHtml = popupHtml.replace(/v\d+\.\d+\.\d+(-dev)?/g, `v${displayVersion}`);
-	await fs.writeFile(correctPopupPath, popupHtml);
-
-	// Ensure popup.css is in the correct location
-	console.log('Copying popup.css...');
-	const srcCssPath = path.resolve(__dirname, 'src', 'popup', 'popup.css');
-	const distCssPath = path.join(distDir, 'popup.css');
-	if (await fs.pathExists(srcCssPath)) {
-		await fs.copy(srcCssPath, distCssPath, { overwrite: true });
+		let popupHtml = await fs.readFile(wrongPopupPath, 'utf-8');
+		popupHtml = popupHtml.replace(
+			/v\d+\.\d+\.\d+(-dev)?/g,
+			`v${displayVersion}`
+		);
+		popupHtml = await minifyHtml(popupHtml);
+		await fs.writeFile(correctPopupPath, popupHtml);
+		await fs.remove(wrongPopupPath);
 	}
 
 	// Copy and update manifest
