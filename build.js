@@ -41,20 +41,30 @@ function logBuildInfo(isProduction, useMockData) {
 	console.log('\n');
 }
 
-async function copyUtilsFolder(srcPath, destPath, isProduction) {
-	await fs.ensureDir(destPath);
-	const files = await fs.readdir(srcPath);
+async function cleanupFiles(distDir, isProduction) {
+	console.log('Cleaning up unnecessary files...');
 
-	for (const file of files) {
-		const srcFilePath = path.join(srcPath, file);
-		const destFilePath = path.join(destPath, file);
+	// Remove unhashed helpers.js if it exists
+	const unhashedHelpersPath = path.join(distDir, 'helpers.js');
+	if (await fs.pathExists(unhashedHelpersPath)) {
+		await fs.remove(unhashedHelpersPath);
+		console.log('Removed unhashed helpers.js');
+	}
 
-		if (file === 'mockData.js' && isProduction) {
-			console.log('Skipping mockData.js in production build');
-			continue;
+	// Remove mockData.js in production
+	if (isProduction) {
+		const mockDataPath = path.join(distDir, 'shared', 'mockData.js');
+		if (await fs.pathExists(mockDataPath)) {
+			await fs.remove(mockDataPath);
+			console.log('Removed mockData.js');
 		}
+	}
 
-		await fs.copy(srcFilePath, destFilePath);
+	// Remove src directory if it exists
+	const srcDir = path.join(distDir, 'src');
+	if (await fs.pathExists(srcDir)) {
+		await fs.remove(srcDir);
+		console.log('Removed src directory');
 	}
 }
 
@@ -118,27 +128,8 @@ async function build() {
 		path.join(distDir, 'images')
 	);
 
-	// Copy utils folder, excluding mockData.js in production
-	console.log('Copying utils folder...');
-	const srcUtilsPath = path.resolve(__dirname, 'src', 'utils');
-	const destUtilsPath = path.join(distDir, 'shared');
-	await copyUtilsFolder(srcUtilsPath, destUtilsPath, isProduction);
-
-	// Remove mockData.js from dist if it exists (extra precaution)
-	if (isProduction) {
-		const mockDataPath = path.join(distDir, 'shared', 'mockData.js');
-		if (await fs.pathExists(mockDataPath)) {
-			console.log('Removing mockData.js from dist folder...');
-			await fs.remove(mockDataPath);
-		}
-	}
-
-	// Clean up unnecessary directories
-	console.log('Cleaning up...');
-	const srcDir = path.join(distDir, 'src');
-	if (await fs.pathExists(srcDir)) {
-		await fs.remove(srcDir);
-	}
+	// Clean up unnecessary files
+	await cleanupFiles(distDir, isProduction);
 
 	console.log(`Build for version ${version} completed successfully!`);
 

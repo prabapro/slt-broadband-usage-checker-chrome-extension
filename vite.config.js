@@ -61,16 +61,24 @@ export default defineConfig(({ command, mode }) => {
 				},
 			},
 			{
-				name: 'copy-utils',
-				writeBundle() {
-					const srcPath = resolve(__dirname, 'src/utils');
-					const destPath = resolve(__dirname, 'dist/shared');
-					fs.ensureDirSync(destPath);
-					fs.readdirSync(srcPath).forEach((file) => {
-						if (file !== 'mockData.js' || !isProduction) {
-							fs.copySync(resolve(srcPath, file), resolve(destPath, file));
+				name: 'clean-up-utils',
+				writeBundle(options, bundle) {
+					const distPath = resolve(__dirname, 'dist');
+					const sharedPath = resolve(distPath, 'shared');
+
+					// Remove unhashed helpers.js if it exists
+					const unhashedHelpersPath = resolve(distPath, 'helpers.js');
+					if (fs.existsSync(unhashedHelpersPath)) {
+						fs.unlinkSync(unhashedHelpersPath);
+					}
+
+					// Remove mockData.js in production
+					if (isProduction) {
+						const mockDataPath = resolve(sharedPath, 'mockData.js');
+						if (fs.existsSync(mockDataPath)) {
+							fs.unlinkSync(mockDataPath);
 						}
-					});
+					}
 				},
 			},
 		],
