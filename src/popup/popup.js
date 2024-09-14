@@ -165,30 +165,29 @@ const checkAuthAndDisplay = async () => {
 };
 
 const showWelcomeScreen = () => {
-	const mainContent = document.querySelector('main');
-	const accountInfo = document.getElementById('account-info');
-	const accountId = document.getElementById('account-id');
-	const lastUpdated = document.getElementById('last-updated');
-	const refreshBtn = document.getElementById('refresh-btn');
-	const resetBtn = document.getElementById('reset-btn');
+	const elementsToHide = [
+		document.querySelector('main'),
+		document.getElementById('account-info'),
+		document.getElementById('account-id'),
+		document.getElementById('last-updated'),
+		document.getElementById('refresh-btn'),
+		document.getElementById('reset-btn'),
+	];
 
-	if (mainContent) mainContent.style.display = 'none';
-	if (accountInfo) accountInfo.style.display = 'none';
-	if (accountId) accountId.style.display = 'none';
-	if (lastUpdated) lastUpdated.style.display = 'none';
-	if (refreshBtn) refreshBtn.style.display = 'none';
-	if (resetBtn) resetBtn.style.display = 'none';
+	elementsToHide.forEach((element) => {
+		if (element) element.style.display = 'none';
+	});
 
 	const welcomeScreen = document.createElement('div');
 	welcomeScreen.id = 'welcome-screen';
 	welcomeScreen.innerHTML = `
-    <h2>Hey 👋</h2>
-    <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
-    <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
-    <button id="welcome-login-btn">Open MySLT Portal</button>
-  `;
+        <h2>Hey 👋</h2>
+        <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
+        <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
+        <button id="welcome-login-btn">Open MySLT Portal</button>
+    `;
 
-	document.body.insertBefore(welcomeScreen, mainContent);
+	document.body.insertBefore(welcomeScreen, document.querySelector('main'));
 
 	document.getElementById('welcome-login-btn').addEventListener('click', () => {
 		chrome.runtime.sendMessage({
