@@ -1,10 +1,11 @@
+const USE_MOCK_DATA = false; // Set this to false to use real API data
+const MINUTES_IN_MS = 60 * 1000; // 1 minute in milliseconds
+const CACHE_DURATION = 15 * MINUTES_IN_MS; // 5 minutes in milliseconds
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
 const SUPPORT_URL =
 	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/support';
 const REVIEW_URL =
 	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/reviews';
-const CACHE_DURATION = 60 * 60 * 1000; // 60 minutes in milliseconds
-const USE_MOCK_DATA = false; // Set this to false to use real API data
 
 // Mock data included directly in popup.js
 const mockData = {
