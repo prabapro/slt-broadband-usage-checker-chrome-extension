@@ -12,6 +12,9 @@ export default defineConfig(({ command, mode }) => {
 	const isProduction = mode === 'production';
 	const useMockData = !isProduction && process.env.USE_MOCK_DATA === 'true';
 	const displayVersion = isProduction ? baseVersion : `${baseVersion}-dev`;
+	const uiDisplayVersion = useMockData
+		? `${displayVersion}-mock`
+		: displayVersion;
 
 	return {
 		define: {
@@ -49,7 +52,10 @@ export default defineConfig(({ command, mode }) => {
 			{
 				name: 'version-injection',
 				transformIndexHtml(html) {
-					return html.replace(/v\d+\.\d+\.\d+(-dev)?/g, `v${displayVersion}`);
+					return html.replace(
+						/v\d+\.\d+\.\d+(-dev)?(-mock)?/g,
+						`v${uiDisplayVersion}`
+					);
 				},
 			},
 			{
