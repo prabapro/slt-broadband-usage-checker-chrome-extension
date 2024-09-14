@@ -47,7 +47,8 @@ async function getOrCreateSessionId() {
 }
 
 // Send page view event to GA4
-async function sendPageView(pageTitle, pageLocation, version) {
+async function sendPageView(pageTitle, pageLocation) {
+	const version = chrome.runtime.getManifest().version;
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
@@ -84,7 +85,8 @@ async function sendPageView(pageTitle, pageLocation, version) {
 }
 
 // Send event to GA4
-async function sendEvent(name, params = {}, version) {
+async function sendEvent(name, params = {}) {
+	const version = chrome.runtime.getManifest().version;
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
