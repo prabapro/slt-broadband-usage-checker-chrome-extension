@@ -1,8 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { build as viteBuild } from 'vite';
 import archiver from 'archiver';
 import dotenv from 'dotenv';
@@ -11,8 +9,6 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const execAsync = promisify(exec);
 
 async function zipDirectory(sourceDir, outPath) {
 	const archive = archiver('zip', { zlib: { level: 9 } });
@@ -29,30 +25,54 @@ async function zipDirectory(sourceDir, outPath) {
 	});
 }
 
+function logBuildInfo(isProduction, useMockData) {
+	const buildType = isProduction ? 'Production' : 'Development';
+	const mockDataStatus = isProduction ? 'N/A' : useMockData ? 'Yes' : 'No';
+
+	console.log('\n');
+	console.log('='.repeat(50));
+	console.log('Build Configuration');
+	console.log('='.repeat(50));
+	console.table({
+		'Build Type': buildType,
+		'Using Mock Data': mockDataStatus,
+	});
+	console.log('='.repeat(50));
+	console.log('\n');
+}
+
+async function copyUtilsFolder(srcPath, destPath, isProduction) {
+	await fs.ensureDir(destPath);
+	const files = await fs.readdir(srcPath);
+
+	for (const file of files) {
+		const srcFilePath = path.join(srcPath, file);
+		const destFilePath = path.join(destPath, file);
+
+		if (file === 'mockData.js' && isProduction) {
+			console.log('Skipping mockData.js in production build');
+			continue;
+		}
+
+		await fs.copy(srcFilePath, destFilePath);
+	}
+}
+
 async function build() {
-	// Get version from package.json
 	const packageJson = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
 	const version = packageJson.version;
 
 	console.log(`Building version ${version}...`);
 
-	// Determine if this is a production build
 	const isProduction = process.env.NODE_ENV === 'production';
-	console.log(`Build type: ${isProduction ? 'Production' : 'Development'}`);
+	const useMockData = !isProduction && process.env.USE_MOCK_DATA === 'true';
 
-	// Determine whether to use mock data
-	const useMockData = isProduction
-		? false
-		: process.env.USE_MOCK_DATA === 'true';
-	console.log(`Using mock data: ${useMockData}`);
+	logBuildInfo(isProduction, useMockData);
 
-	// Run Vite build
 	console.log('Running Vite build...');
 	try {
 		await viteBuild({
-			define: {
-				__USE_MOCK_DATA__: useMockData,
-			},
+			mode: isProduction ? 'production' : 'development',
 		});
 	} catch (error) {
 		console.error('Vite build failed:', error);
@@ -98,6 +118,21 @@ async function build() {
 		path.join(distDir, 'images')
 	);
 
+	// Copy utils folder, excluding mockData.js in production
+	console.log('Copying utils folder...');
+	const srcUtilsPath = path.resolve(__dirname, 'src', 'utils');
+	const destUtilsPath = path.join(distDir, 'shared');
+	await copyUtilsFolder(srcUtilsPath, destUtilsPath, isProduction);
+
+	// Remove mockData.js from dist if it exists (extra precaution)
+	if (isProduction) {
+		const mockDataPath = path.join(distDir, 'shared', 'mockData.js');
+		if (await fs.pathExists(mockDataPath)) {
+			console.log('Removing mockData.js from dist folder...');
+			await fs.remove(mockDataPath);
+		}
+	}
+
 	// Clean up unnecessary directories
 	console.log('Cleaning up...');
 	const srcDir = path.join(distDir, 'src');
@@ -109,11 +144,9 @@ async function build() {
 
 	// Create zip file only for production builds
 	if (isProduction) {
-		// Create dist_zip folder if it doesn't exist
 		const distZipDir = path.resolve(__dirname, 'dist_zip');
 		await fs.ensureDir(distZipDir);
 
-		// Zip the dist folder
 		const zipFileName = `release_v${version}.zip`;
 		const zipFilePath = path.join(distZipDir, zipFileName);
 		console.log(`Creating ${zipFileName} in dist_zip folder...`);
