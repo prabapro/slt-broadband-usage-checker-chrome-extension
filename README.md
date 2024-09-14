@@ -387,28 +387,18 @@ Common parameters included in all events:
 
 ## Debugging Analytics Events
 
-To debug analytics events in the popup and service worker:
+To debug analytics events in the service worker:
 
-1. For popup events:
+- Go to `chrome://extensions`
+- Find your extension and click on "Inspect views: service worker"
+- In the Console tab, you'll see logs for events handled by the service worker
+- Use the Network tab to inspect the actual requests being sent to GA4. Look for requests to `google-analytics.com`.
 
-   - Open the extension popup
-   - Right-click and select "Inspect" to open Chrome DevTools
-   - In the Console tab, you'll see logs for each event being sent
+#### Enable GA4 DebugView:
 
-2. For service worker events:
+> [!IMPORTANT]
+> Remove any debug code or console logs before publishing the extension.
 
-   - Go to `chrome://extensions`
-   - Find your extension and click on "Inspect views: service worker"
-   - In the Console tab, you'll see logs for events handled by the service worker
-
-3. Enable GA4 DebugView:
-
-   > [!IMPORTANT]
-   >
-   > Remove any debug code or console logs before publishing the extension.
-
-   - In your GA4 property, go to Admin > DebugView
-   - In your extension's background script, add `&debug_mode=1` to the `GA4_ENDPOINT URL`
-   - Events will now appear in real-time in the DebugView
-
-4. Use the Network tab in DevTools to inspect the actual requests being sent to GA4. Look for requests to `www.google-analytics.com`.
+- In your GA4 property, go to _Admin > DebugView_
+- In your extension's background script, add `&debug_mode=1` to the `GA4_ENDPOINT URL`
+- Events will now appear in real-time in the DebugView
