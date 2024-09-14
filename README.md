@@ -352,7 +352,7 @@ This extension uses Google Analytics 4 (GA4) [Measurement Protocol](https://deve
 | Event Name              | Description                                                       | Parameters                                                                                              |
 | ----------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `page_view`             | Fired when a page is viewed                                       | `page_title`: string<br>`page_location`: string<br>`app_version`: string                                |
-| extension_installed     | Fired when the extension is first installed                       | `install_type`: `new`                                                                                   |
+| `extension_installed`   | Fired when the extension is first installed                       | `install_type`: `new`                                                                                   |
 | `extension_updated`     | Fired when the extension is updated                               | `previous_version`: string<br>`current_version`: string                                                 |
 | `extension_reset`       | Fired when the user resets the extension                          | No additional parameters                                                                                |
 | `refresh_clicked`       | Fired when the user clicks the refresh button                     | No additional parameters                                                                                |
