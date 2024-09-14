@@ -6,15 +6,16 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
-const version = packageJson.version;
+const baseVersion = packageJson.version;
 
 export default defineConfig(({ command, mode }) => {
 	const isProduction = mode === 'production';
 	const useMockData = !isProduction && process.env.USE_MOCK_DATA === 'true';
+	const displayVersion = isProduction ? baseVersion : `${baseVersion}-dev`;
 
 	return {
 		define: {
-			__APP_VERSION__: JSON.stringify(version),
+			__APP_VERSION__: JSON.stringify(displayVersion),
 			__GA4_MEASUREMENT_ID__: JSON.stringify(process.env.GA4_MEASUREMENT_ID),
 			__GA4_API_SECRET__: JSON.stringify(process.env.GA4_API_SECRET),
 			__USE_MOCK_DATA__: useMockData,
@@ -48,7 +49,7 @@ export default defineConfig(({ command, mode }) => {
 			{
 				name: 'version-injection',
 				transformIndexHtml(html) {
-					return html.replace(/v\d+\.\d+\.\d+/g, `v${version}`);
+					return html.replace(/v\d+\.\d+\.\d+(-dev)?/g, `v${displayVersion}`);
 				},
 			},
 			{
@@ -56,7 +57,7 @@ export default defineConfig(({ command, mode }) => {
 				writeBundle() {
 					const manifestPath = resolve(__dirname, 'dist/manifest.json');
 					const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-					manifest.version = version;
+					manifest.version = baseVersion; // Always use the base version for manifest
 					fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 				},
 			},

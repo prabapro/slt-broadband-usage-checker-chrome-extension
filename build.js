@@ -25,7 +25,12 @@ async function zipDirectory(sourceDir, outPath) {
 	});
 }
 
-function logBuildInfo(isProduction, useMockData) {
+function logBuildInfo(
+	isProduction,
+	useMockData,
+	displayVersion,
+	manifestVersion
+) {
 	const buildType = isProduction ? 'Production' : 'Development';
 	const mockDataStatus = isProduction ? 'N/A' : useMockData ? 'Yes' : 'No';
 
@@ -36,6 +41,8 @@ function logBuildInfo(isProduction, useMockData) {
 	console.table({
 		'Build Type': buildType,
 		'Using Mock Data': mockDataStatus,
+		'Display Version': displayVersion,
+		'Manifest Version': manifestVersion,
 	});
 	console.log('='.repeat(50));
 	console.log('\n');
@@ -70,14 +77,15 @@ async function cleanupFiles(distDir, isProduction) {
 
 async function build() {
 	const packageJson = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
-	const version = packageJson.version;
-
-	console.log(`Building version ${version}...`);
+	const baseVersion = packageJson.version;
 
 	const isProduction = process.env.NODE_ENV === 'production';
 	const useMockData = !isProduction && process.env.USE_MOCK_DATA === 'true';
+	const displayVersion = isProduction ? baseVersion : `${baseVersion}-dev`;
 
-	logBuildInfo(isProduction, useMockData);
+	console.log(`Building version ${displayVersion}...`);
+
+	logBuildInfo(isProduction, useMockData, displayVersion, baseVersion);
 
 	console.log('Running Vite build...');
 	try {
@@ -102,7 +110,7 @@ async function build() {
 	// Update version in popup.html
 	console.log('Updating version in popup.html...');
 	let popupHtml = await fs.readFile(correctPopupPath, 'utf-8');
-	popupHtml = popupHtml.replace(/v\d+\.\d+\.\d+/g, `v${version}`);
+	popupHtml = popupHtml.replace(/v\d+\.\d+\.\d+(-dev)?/g, `v${displayVersion}`);
 	await fs.writeFile(correctPopupPath, popupHtml);
 
 	// Ensure popup.css is in the correct location
@@ -118,7 +126,7 @@ async function build() {
 	const manifestSrcPath = path.resolve(__dirname, 'public', 'manifest.json');
 	const manifestDestPath = path.join(distDir, 'manifest.json');
 	let manifest = JSON.parse(await fs.readFile(manifestSrcPath, 'utf-8'));
-	manifest.version = version;
+	manifest.version = baseVersion; // Always use the base version for manifest
 	await fs.writeJson(manifestDestPath, manifest, { spaces: 2 });
 
 	// Copy images
@@ -131,14 +139,14 @@ async function build() {
 	// Clean up unnecessary files
 	await cleanupFiles(distDir, isProduction);
 
-	console.log(`Build for version ${version} completed successfully!`);
+	console.log(`Build for version ${displayVersion} completed successfully!`);
 
 	// Create zip file only for production builds
 	if (isProduction) {
 		const distZipDir = path.resolve(__dirname, 'dist_zip');
 		await fs.ensureDir(distZipDir);
 
-		const zipFileName = `release_v${version}.zip`;
+		const zipFileName = `release_v${baseVersion}.zip`;
 		const zipFilePath = path.join(distZipDir, zipFileName);
 		console.log(`Creating ${zipFileName} in dist_zip folder...`);
 		await zipDirectory(distDir, zipFilePath);
