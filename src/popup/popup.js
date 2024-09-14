@@ -182,8 +182,15 @@ const showWelcomeScreen = () => {
 	welcomeScreen.id = 'welcome-screen';
 	welcomeScreen.innerHTML = `
         <h2>Hey 👋</h2>
-        <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
-        <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
+        <p>To get started, we need to fetch your session data from the MySLT Portal. Follow these steps:</p>
+        <div id="welcome-instructions">
+			<ol>
+				<li>Click the button below to open the MySLT Portal in a new tab.</li>
+				<li>Log in to your account if needed.</li>
+				<li>After logging in, close the MySLT Portal tab.</li>
+				<li>Click on this extension icon again to view your data usage.</li>
+			</ol>
+		</div>
         <button id="welcome-login-btn">Open MySLT Portal</button>
     `;
 
