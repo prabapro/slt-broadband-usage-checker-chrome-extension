@@ -6,10 +6,13 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "node build.js",
-		"build:prod": "cross-env NODE_ENV=production node build.js",
-		"preview": "vite preview"
+		"build:prod": "npm run clean:dist_zip && cross-env NODE_ENV=production node build.js && npm run unzip:prod",
+		"preview": "vite preview",
+		"clean:dist_zip": "node scripts/cleanFolder.js dist_zip",
+		"unzip:prod": "node scripts/unzipProd.js"
 	},
 	"devDependencies": {
+		"adm-zip": "^0.5.16",
 		"archiver": "^7.0.1",
 		"cross-env": "^7.0.3",
 		"dotenv": "^16.4.5",
