@@ -1,5 +1,3 @@
-import { sendPageView, sendEvent } from '../services/analytics.js';
-
 const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
 const SUPPORT_URL =
 	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/support';
@@ -106,13 +104,30 @@ const mockData = {
 	],
 };
 
+// Update the sendPageView function
+const sendPageView = (pageTitle) => {
+	chrome.runtime.sendMessage({
+		action: 'sendPageView',
+		pageTitle,
+		pageLocation: document.location.href,
+	});
+};
+
+// Update the sendEvent function
+const sendEvent = (eventName, eventParams = {}) => {
+	chrome.runtime.sendMessage({
+		action: 'sendEvent',
+		eventName,
+		eventParams,
+	});
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('refresh-btn').addEventListener('click', () => {
-		sendEvent('refresh_clicked', {}, __APP_VERSION__);
+		sendEvent('refresh_clicked');
 		checkUsage(true);
 	});
 	document.getElementById('reset-btn').addEventListener('click', () => {
-		sendEvent('extension_reset', {}, __APP_VERSION__);
 		resetExtension();
 	});
 	document.getElementById('support-link').addEventListener('click', (e) => {
@@ -127,11 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	checkAuthAndDisplay();
 
 	// Send page view event
-	sendPageView(
-		'SLT Usage Checker Popup',
-		document.location.href,
-		__APP_VERSION__
-	);
+	sendPageView('SLT Usage Checker Popup');
 });
 
 let currentPage = 0;
@@ -154,28 +165,36 @@ const checkAuthAndDisplay = async () => {
 };
 
 const showWelcomeScreen = () => {
-	const mainContent = document.querySelector('main');
-	const accountId = document.getElementById('account-id');
-	const lastUpdated = document.getElementById('last-updated');
-	const refreshBtn = document.getElementById('refresh-btn');
-	const resetBtn = document.getElementById('reset-btn');
+	const elementsToHide = [
+		document.querySelector('main'),
+		document.getElementById('account-info'),
+		document.getElementById('account-id'),
+		document.getElementById('last-updated'),
+		document.getElementById('refresh-btn'),
+		document.getElementById('reset-btn'),
+	];
 
-	if (mainContent) mainContent.style.display = 'none';
-	if (accountId) accountId.style.display = 'none';
-	if (lastUpdated) lastUpdated.style.display = 'none';
-	if (refreshBtn) refreshBtn.style.display = 'none';
-	if (resetBtn) resetBtn.style.display = 'none';
+	elementsToHide.forEach((element) => {
+		if (element) element.style.display = 'none';
+	});
 
 	const welcomeScreen = document.createElement('div');
 	welcomeScreen.id = 'welcome-screen';
 	welcomeScreen.innerHTML = `
-    <h2>Hey 👋</h2>
-    <p>To get started, we need to fetch your session data from the MySLT Portal. Click the button below to open the MySLT Portal in a new tab.</p>
-    <p>If you're already logged in, simply opening the portal should be enough. If not, you'll need to log in to your account.</p>
-    <button id="welcome-login-btn">Open MySLT Portal</button>
-  `;
+        <h2>Hey 👋</h2>
+        <p>To get started, we need to fetch your session data from the MySLT Portal. Follow these steps:</p>
+        <div id="welcome-instructions">
+			<ol>
+				<li>Click the button below to open the MySLT Portal in a new tab.</li>
+				<li>Log in to your account if needed.</li>
+				<li>After logging in, close the MySLT Portal tab.</li>
+				<li>Click on this extension icon again to view your data usage.</li>
+			</ol>
+		</div>
+        <button id="welcome-login-btn">Open MySLT Portal</button>
+    `;
 
-	document.body.insertBefore(welcomeScreen, mainContent);
+	document.body.insertBefore(welcomeScreen, document.querySelector('main'));
 
 	document.getElementById('welcome-login-btn').addEventListener('click', () => {
 		chrome.runtime.sendMessage({
@@ -187,11 +206,7 @@ const showWelcomeScreen = () => {
 	});
 
 	// Send page view event for welcome screen
-	sendPageView(
-		'SLT Usage Checker Welcome Screen',
-		document.location.href,
-		__APP_VERSION__
-	);
+	sendPageView('SLT Usage Checker Welcome Screen');
 };
 
 const checkUsage = async (forceRefresh = false) => {
@@ -240,16 +255,16 @@ const checkUsage = async (forceRefresh = false) => {
 			now - cacheTimestamp < CACHE_DURATION
 		) {
 			console.log('Using cached data');
-			sendEvent('usage_checked', { data_source: 'cache' }, __APP_VERSION__);
+			sendEvent('usage_checked', { data_source: 'cache' });
 			displayUsageData(cachedData, subscriberId);
 		} else {
 			console.log('Fetching fresh data');
-			sendEvent('usage_checked', { data_source: 'api' }, __APP_VERSION__);
+			sendEvent('usage_checked', { data_source: 'api' });
 			await fetchAllData(authToken, sltClientId, subscriberId);
 		}
 	} catch (error) {
 		console.error('Error in checkUsage:', error);
-		sendEvent('error', { error_type: 'check_usage_error' }, __APP_VERSION__);
+		sendEvent('error', { error_type: 'check_usage_error' });
 		showError('An unexpected error occurred. Please try again later.');
 	}
 };
@@ -313,7 +328,7 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 		displayUsageData(combinedData, subscriberId);
 	} catch (error) {
 		console.error('Error fetching data:', error);
-		sendEvent('error', { error_type: 'data_fetch_error' }, __APP_VERSION__);
+		sendEvent('error', { error_type: 'data_fetch_error' });
 		showError(
 			'Error fetching data. Your session might have expired. Please try re-login.'
 		);
@@ -334,11 +349,7 @@ const displayUsageData = (data, subscriberId) => {
 	updateLastUpdatedTime(data.reported_time);
 
 	// Send page view event for usage data screen
-	sendPageView(
-		'SLT Usage Data Screen',
-		document.location.href,
-		__APP_VERSION__
-	);
+	sendPageView('SLT Usage Data Screen');
 };
 
 const formatAccountId = (accountId) => {
@@ -365,13 +376,9 @@ const updateAccountInfo = (accountId, speedStatus) => {
 		console.log('Speed Status:', formattedStatus);
 
 		// Send GA4 event for speed status
-		sendEvent(
-			'speed_status_checked',
-			{
-				speed_status: speedStatus.toLowerCase(),
-			},
-			__APP_VERSION__
-		);
+		sendEvent('speed_status_checked', {
+			speed_status: speedStatus.toLowerCase(),
+		});
 	}
 };
 
@@ -430,14 +437,10 @@ const createUsageDataGroups = (usageData) => {
 	// Send event for the initially viewed group
 	if (totalPages > 0) {
 		const initialGroup = usageContainer.children[0];
-		sendEvent(
-			'group_viewed',
-			{
-				group_name: initialGroup.dataset.groupName,
-				band_name: initialGroup.dataset.bandName,
-			},
-			__APP_VERSION__
-		);
+		sendEvent('group_viewed', {
+			group_name: initialGroup.dataset.groupName,
+			band_name: initialGroup.dataset.bandName,
+		});
 	}
 };
 
@@ -525,14 +528,10 @@ const goToPage = (pageNumber) => {
 		const isActive = index === pageNumber;
 		group.classList.toggle('active', isActive);
 		if (isActive) {
-			sendEvent(
-				'group_viewed',
-				{
-					group_name: group.dataset.groupName,
-					band_name: group.dataset.bandName,
-				},
-				__APP_VERSION__
-			);
+			sendEvent('group_viewed', {
+				group_name: group.dataset.groupName,
+				band_name: group.dataset.bandName,
+			});
 		}
 	});
 
@@ -620,42 +619,19 @@ const clearError = () => {
 };
 
 const resetExtension = () => {
-	console.log('Clearing stored data and preparing to re-authenticate');
-	chrome.runtime.sendMessage({
-		action: 'sendEvent',
-		eventName: 'extension_reset',
-		eventParams: {},
-	});
 	showMessage('Clearing extension data...', 'info');
 
-	chrome.storage.local.remove(
-		[
-			'authToken',
-			'sltClientId',
-			'cachedData',
-			'cacheTimestamp',
-			'subscriberId',
-		],
-		() => {
-			if (chrome.runtime.lastError) {
-				console.error('Error clearing data:', chrome.runtime.lastError);
-				chrome.runtime.sendMessage({
-					action: 'sendEvent',
-					eventName: 'error',
-					eventParams: {
-						error_type: 'clear_data_error',
-						error_message: chrome.runtime.lastError.message,
-					},
-				});
-				showMessage('Error clearing data. Please try again.', 'error');
-			} else {
-				showMessage('Data cleared. Please re-authenticate.', 'success');
-				setTimeout(() => {
-					showWelcomeScreen();
-				}, 1500); // Wait for 1.5 seconds to show the success message
-			}
+	chrome.runtime.sendMessage({ action: 'resetExtension' }, (response) => {
+		if (response.status === 'error') {
+			console.error('Error clearing data:', response.message);
+			showMessage('Error clearing data. Please try again.', 'error');
+		} else {
+			showMessage('Data cleared. Please re-authenticate.', 'success');
+			setTimeout(() => {
+				showWelcomeScreen();
+			}, 1500);
 		}
-	);
+	});
 };
 
 const showMessage = (message, type = 'info') => {
@@ -705,15 +681,11 @@ const fetchFromAPI = async (endpoint, authToken, sltClientId, subscriberId) => {
 		}
 		return response.json();
 	} catch (error) {
-		sendEvent(
-			'error',
-			{
-				error_type: 'api_fetch_error',
-				error_message: error.message,
-				endpoint: endpoint,
-			},
-			__APP_VERSION__
-		);
+		sendEvent('error', {
+			error_type: 'api_fetch_error',
+			error_message: error.message,
+			endpoint: endpoint,
+		});
 		throw error; // Re-throw the error to be handled by the caller
 	}
 };
