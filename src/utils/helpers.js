@@ -56,7 +56,9 @@ export function createDataGroup(serviceName, items) {
 function createProgressBar(data) {
 	const usedAmount = parseFloat(data.used);
 	const totalAmount = parseFloat(data.limit);
+	const quotaUnit = data.volume_unit;
 	const usedPercentage = (usedAmount / totalAmount) * 100;
+	const remainingBalance = (totalAmount - usedAmount).toFixed(2);
 	const remainingPercentage = Math.max(0, 100 - usedPercentage);
 
 	const progressBar = document.createElement('div');
@@ -67,7 +69,9 @@ function createProgressBar(data) {
 		? 'Quota exceeded'
 		: remainingPercentage === 0
 		? 'Quota fully used'
-		: `${remainingPercentage.toFixed(1)}% remaining till ${data.expiry_date}`;
+		: `<strong>${remainingBalance} ${quotaUnit}</strong> (${remainingPercentage.toFixed(
+				1
+		  )}%) remaining till ${data.expiry_date}`;
 
 	const fillClass = isExceeded
 		? 'fill-exceeded'
@@ -89,12 +93,10 @@ function createProgressBar(data) {
     </div>
     <div class="progress-info">
       <span>
-        <span class="usage-amount">${usedAmount.toFixed(1)} ${
-		data.volume_unit
-	}</span> / 
-        <span class="total-amount">${totalAmount.toFixed(1)} ${
-		data.volume_unit
-	}</span>
+        <span class="usage-amount">${usedAmount.toFixed(
+					1
+				)} ${quotaUnit}</span> / 
+        <span class="total-amount">${totalAmount.toFixed(1)} ${quotaUnit}</span>
       </span>
       <span class="status-text ${
 				isExceeded ? 'exceeded' : ''
