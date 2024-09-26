@@ -1,108 +1,113 @@
-// src/utils/helpers.js
-
+// Subscriber ID formatting
 export function formatSubscriberId(id) {
-	if (id.startsWith('0')) {
-		return '94' + id.substring(1);
-	} else if (id.startsWith('94')) {
-		return id;
-	} else {
-		console.warn('Unexpected subscriberId format:', id);
-		return id;
-	}
+	if (id.startsWith('0')) return '94' + id.substring(1);
+	if (id.startsWith('94')) return id;
+	console.warn('Unexpected subscriberId format:', id);
+	return id;
 }
 
 export function formatAccountId(accountId) {
-	if (accountId.startsWith('94')) {
-		return '0' + accountId.slice(2);
-	}
-	return accountId;
+	return accountId.startsWith('94') ? '0' + accountId.slice(2) : accountId;
 }
 
+// Speed status formatting
 export function formatSpeedStatus(status) {
-	status = status.toLowerCase();
-	if (status === 'normal') {
-		return 'Speed is Normal';
-	} else if (status === 'throttle' || status === 'throttled') {
+	const lowerStatus = status.toLowerCase();
+	if (lowerStatus === 'normal') return 'Speed is Normal';
+	if (['throttle', 'throttled'].includes(lowerStatus))
 		return 'Speed is Throttled';
-	} else {
-		return status.charAt(0).toUpperCase() + status.slice(1);
-	}
+	return status.charAt(0).toUpperCase() + lowerStatus.slice(1);
 }
 
 export function getStatusClass(status) {
-	status = status.toLowerCase();
-	if (status === 'normal') {
-		return 'status-normal';
-	} else if (status === 'throttle' || status === 'throttled') {
+	const lowerStatus = status.toLowerCase();
+	if (lowerStatus === 'normal') return 'status-normal';
+	if (['throttle', 'throttled'].includes(lowerStatus))
 		return 'status-throttled';
-	} else {
-		return 'status-other';
-	}
+	return 'status-other';
 }
 
+// Data group creation
 export function createDataGroup(serviceName, items) {
 	const group = document.createElement('div');
 	group.className = 'data-group';
 	group.innerHTML = `<h2>${serviceName}</h2>`;
-
-	items.forEach((item) => {
-		group.appendChild(createProgressBar(item));
-	});
-
+	items.forEach((item) => group.appendChild(createProgressBar(item)));
 	return group;
 }
 
-// Internal function, not exported
+// Helper functions for createProgressBar
+const calculatePercentage = (used, total) => (used / total) * 100;
+const formatNumber = (number, decimals = 1) => number.toFixed(decimals);
+
+const getStatusText = (
+	isExceeded,
+	remainingPercentage,
+	remainingBalance,
+	quotaUnit,
+	expiryDate
+) => {
+	if (isExceeded) return 'Quota exceeded';
+	if (remainingPercentage === 0) return 'Quota fully used';
+	return `<strong>${remainingBalance} ${quotaUnit}</strong> (${formatNumber(
+		remainingPercentage
+	)}%) remaining till ${expiryDate}`;
+};
+
+const getFillClass = (percentage) => {
+	if (percentage >= 100) return 'fill-exceeded';
+	if (percentage < 25) return 'fill-low';
+	if (percentage < 50) return 'fill-medium';
+	if (percentage < 75) return 'fill-high';
+	return 'fill-very-high';
+};
+
+// Progress bar creation
 function createProgressBar(data) {
-	const usedAmount = parseFloat(data.used);
-	const totalAmount = parseFloat(data.limit);
-	const quotaUnit = data.volume_unit;
-	const usedPercentage = (usedAmount / totalAmount) * 100;
-	const remainingBalance = (totalAmount - usedAmount).toFixed(2);
+	const {
+		used,
+		limit,
+		volume_unit: quotaUnit,
+		name,
+		expiry_date: expiryDate,
+	} = data;
+	const usedAmount = parseFloat(used);
+	const totalAmount = parseFloat(limit);
+	const usedPercentage = calculatePercentage(usedAmount, totalAmount);
+	const remainingBalance = formatNumber(totalAmount - usedAmount, 2);
 	const remainingPercentage = Math.max(0, 100 - usedPercentage);
+
+	const isExceeded = usedAmount > totalAmount;
+	const isFullyUsed = usedAmount === totalAmount;
+	const statusText = getStatusText(
+		isExceeded,
+		remainingPercentage,
+		remainingBalance,
+		quotaUnit,
+		expiryDate
+	);
+	const fillClass = getFillClass(usedPercentage);
 
 	const progressBar = document.createElement('div');
 	progressBar.className = 'progress-bar';
-
-	const isExceeded = usedAmount >= totalAmount;
-	const statusText = isExceeded
-		? 'Quota exceeded'
-		: remainingPercentage === 0
-		? 'Quota fully used'
-		: `<strong>${remainingBalance} ${quotaUnit}</strong> (${remainingPercentage.toFixed(
-				1
-		  )}%) remaining till ${data.expiry_date}`;
-
-	const fillClass = isExceeded
-		? 'fill-exceeded'
-		: usedPercentage < 25
-		? 'fill-low'
-		: usedPercentage < 50
-		? 'fill-medium'
-		: usedPercentage < 75
-		? 'fill-high'
-		: 'fill-very-high';
-
 	progressBar.innerHTML = `
-    <h3>${data.name}</h3>
-    <div class="bar">
-      <div class="fill ${fillClass}" style="width: ${Math.min(
+	  <h3>${name}</h3>
+	  <div class="bar">
+		<div class="fill ${fillClass}" style="width: ${Math.min(
 		usedPercentage,
 		100
 	)}%"></div>
-    </div>
-    <div class="progress-info">
-      <span>
-        <span class="usage-amount">${usedAmount.toFixed(
-					1
-				)} ${quotaUnit}</span> / 
-        <span class="total-amount">${totalAmount.toFixed(1)} ${quotaUnit}</span>
-      </span>
-      <span class="status-text ${
-				isExceeded ? 'exceeded' : ''
-			}">${statusText}</span>
-    </div>
-  `;
+	  </div>
+	  <div class="progress-info">
+		<span>
+		  <span class="usage-amount">${formatNumber(usedAmount)} ${quotaUnit}</span> / 
+		  <span class="total-amount">${formatNumber(totalAmount)} ${quotaUnit}</span>
+		</span>
+		<span class="status-text ${
+			isExceeded ? 'exceeded' : isFullyUsed ? 'exceeded' : ''
+		}">${statusText}</span>
+	  </div>
+	`;
 
 	return progressBar;
 }
