@@ -5,6 +5,7 @@ import {
 	formatSpeedStatus,
 	getStatusClass,
 	createDataGroup,
+	checkExtraGB,
 } from '../utils/helpers.js';
 
 const USE_MOCK_DATA = __USE_MOCK_DATA__;
@@ -149,22 +150,19 @@ const checkUsage = async (forceRefresh = false) => {
 				)
 			);
 
+		console.log('Retrieved from storage:');
+		console.log('authToken exists:', !!authToken);
+		console.log('sltClientId exists:', !!sltClientId);
+		console.log('cachedData exists:', !!cachedData);
+		console.log('cacheTimestamp:', cacheTimestamp);
+		console.log('subscriberId:', subscriberId);
+
 		const now = Date.now();
-		console.log('Current time:', new Date(now).toISOString());
-		console.log(
-			'Cached timestamp:',
-			cacheTimestamp
-				? new Date(cacheTimestamp).toISOString()
-				: 'No cached timestamp'
-		);
-		console.log(
-			'Time since last cache:',
-			cacheTimestamp ? `${(now - cacheTimestamp) / 1000} seconds` : 'N/A'
-		);
-		console.log('Cache duration:', `${CACHE_DURATION / 1000} seconds`);
-		console.log('Stored subscriberId:', subscriberId);
+		console.log('Current time:', now);
+		console.log('Cache duration:', CACHE_DURATION);
 
 		if (!authToken || !sltClientId || !subscriberId) {
+			console.log('Missing required data, showing welcome screen');
 			showWelcomeScreen();
 			return;
 		}
@@ -176,8 +174,8 @@ const checkUsage = async (forceRefresh = false) => {
 			now - cacheTimestamp < CACHE_DURATION
 		) {
 			console.log('Using cached data');
+			console.log('Cached data:', JSON.stringify(cachedData, null, 2));
 			sendEvent('usage_checked', { data_source: 'cache' });
-			checkExtraGB(cachedData);
 			displayUsageData(cachedData, subscriberId);
 		} else {
 			console.log('Fetching fresh data');
@@ -205,9 +203,6 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 				resolve
 			)
 		);
-		console.log('Mock data and subscriberId cached successfully');
-		console.log('Calling checkExtraGB with mock data');
-		checkExtraGB(data);
 		displayUsageData(data, subscriberId || 'MockSubscriberId');
 		return;
 	}
@@ -234,10 +229,6 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 			],
 		};
 
-		console.log('Combined Data:', combinedData);
-		console.log('Calling checkExtraGB with real data');
-		checkExtraGB(combinedData);
-
 		const timestamp = Date.now();
 		await new Promise((resolve) =>
 			chrome.storage.local.set(
@@ -250,7 +241,6 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 			)
 		);
 
-		console.log('Combined data and subscriberId cached successfully');
 		displayUsageData(combinedData, subscriberId);
 	} catch (error) {
 		console.error('Error fetching data:', error);
@@ -261,75 +251,39 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 	}
 };
 
-const checkExtraGB = (combinedData) => {
-	console.log('checkExtraGB function called');
-	console.log('combinedData:', combinedData);
-
-	if (!combinedData || !combinedData.usage_data) {
-		console.log('No valid usage data found in combinedData');
-		return;
-	}
-
-	const extraGBData = combinedData.usage_data.filter(
-		(item) => item.service_name === 'Extra GB'
-	);
-	console.log('Filtered Extra GB data:', extraGBData);
-
-	if (extraGBData.length === 0) {
-		console.log('No Extra GB packages found.');
-		return;
-	}
-
-	extraGBData.forEach((pkg) => {
-		const remaining = parseFloat(pkg.remaining);
-		if (remaining > 0) {
-			console.log(
-				`Extra GB package '${pkg.name}' found with ${remaining} ${pkg.volume_unit} remaining.`
-			);
-		} else {
-			console.log(
-				`Extra GB package '${pkg.name}' found, but no data remaining.`
-			);
-		}
-	});
-};
-
 const displayUsageData = (data, subscriberId) => {
-	console.log('Displaying usage data');
-	clearError();
-
-	if (!data?.usage_data) {
+	if (!data || !data.usage_data) {
+		console.error('Invalid usage data received');
 		showError('Invalid usage data received');
 		return;
 	}
 
-	updateAccountInfo(subscriberId, data.speed_status);
+	updateAccountInfo(subscriberId, data.speed_status, data);
 	createUsageDataGroups(data.usage_data);
 	updateLastUpdatedTime(data.reported_time);
 
-	// Send page view event for usage data screen
 	sendPageView('SLT Usage Data Screen');
 };
 
-const updateAccountInfo = (accountId, speedStatus) => {
+const updateAccountInfo = (accountId, speedStatus, combinedData) => {
 	const accountIdElement = document.getElementById('account-id');
 	const speedStatusElement = document.getElementById('speed-status');
 
 	if (accountIdElement) {
 		const formattedId = formatAccountId(accountId);
 		accountIdElement.textContent = `Account: ${formattedId}`;
-		console.log('Formatted Account ID:', formattedId);
 	}
 
 	if (speedStatusElement && speedStatus) {
-		const formattedStatus = formatSpeedStatus(speedStatus);
+		const hasExtraGB = checkExtraGB(combinedData);
+		const formattedStatus = formatSpeedStatus(speedStatus, hasExtraGB);
 		speedStatusElement.textContent = formattedStatus;
 		speedStatusElement.className = `status-pill ${getStatusClass(speedStatus)}`;
 		console.log('Speed Status:', formattedStatus);
 
-		// Send GA4 event for speed status
 		sendEvent('speed_status_checked', {
 			speed_status: speedStatus.toLowerCase(),
+			has_extra_gb: hasExtraGB,
 		});
 	}
 };

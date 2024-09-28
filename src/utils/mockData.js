@@ -1,7 +1,7 @@
 // src/utils/mockData.js
 
 export const mockData = {
-	reported_time: '10-Sep-2024 06:54 PM',
+	reported_time: '28-Sep-2024 04:54 PM',
 	speed_status: 'NORMAL',
 	usage_data: [
 		{
@@ -51,18 +51,18 @@ export const mockData = {
 		},
 		{
 			claim: null,
-			expiry_date: '05-Oct',
+			expiry_date: '27-Nov',
 			fetched_from: '/ExtraGB',
-			limit: 1024,
-			name: 'My Extra GB',
-			percentage: 50,
-			remaining: 0,
+			limit: 50,
+			name: 'Extra GB - 50 GB',
+			percentage: 94,
+			remaining: 47.4,
 			service_name: 'Extra GB',
 			subscriptionid: null,
 			timestamp: 0,
 			unsubscribable: false,
-			used: 1024,
-			volume_unit: 'MB',
+			used: 2.6,
+			volume_unit: 'GB',
 		},
 		{
 			claim: null,

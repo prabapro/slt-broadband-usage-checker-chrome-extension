@@ -21,15 +21,47 @@ export const formatAccountId = (accountId) =>
 	accountId.startsWith('94') ? `0${accountId.slice(2)}` : accountId;
 
 /**
- * Formats the speed status into a readable string.
+ * Checks if there are any Extra GB packages with remaining data.
+ * @param {Object} combinedData - The combined usage data.
+ * @returns {boolean} True if there's remaining Extra GB data, false otherwise.
+ */
+export const checkExtraGB = (combinedData) => {
+	if (!combinedData || !Array.isArray(combinedData.usage_data)) {
+		console.log('Invalid or missing usage_data in combinedData');
+		return false;
+	}
+
+	const extraGBData = combinedData.usage_data.filter(
+		(item) => item.service_name === 'Extra GB'
+	);
+
+	if (extraGBData.length === 0) {
+		return false;
+	}
+
+	const hasRemainingExtraGB = extraGBData.some((pkg) => {
+		const remaining = parseFloat(pkg.remaining);
+		return remaining > 0;
+	});
+
+	console.log(`Has remaining Extra GB: ${hasRemainingExtraGB}`);
+	return hasRemainingExtraGB;
+};
+
+/**
+ * Formats the speed status into a readable string, including Extra GB information if applicable.
  * @param {string} status - The speed status to format.
+ * @param {boolean} hasExtraGB - Whether the user has remaining Extra GB.
  * @returns {string} The formatted speed status.
  */
-export const formatSpeedStatus = (status) => {
+export const formatSpeedStatus = (status, hasExtraGB = false) => {
 	const lowerStatus = status.toLowerCase();
-	if (lowerStatus === 'normal') return 'Speed is Normal';
-	if (['throttle', 'throttled'].includes(lowerStatus))
+	if (lowerStatus === 'normal') {
+		return hasExtraGB ? 'Speed is Normal with Extra GB' : 'Speed is Normal';
+	}
+	if (['throttle', 'throttled'].includes(lowerStatus)) {
 		return 'Speed is Throttled';
+	}
 	return `${status.charAt(0).toUpperCase()}${lowerStatus.slice(1)}`;
 };
 
