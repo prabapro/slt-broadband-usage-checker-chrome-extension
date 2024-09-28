@@ -118,6 +118,7 @@ export const navigateToExtraGBGroup = (goToPage) => {
 export const createDataGroup = (serviceName, items) => {
 	const group = document.createElement('div');
 	group.className = 'data-group';
+	group.dataset.groupName = serviceName;
 	group.innerHTML = `<h2>${serviceName}</h2>`;
 	items.forEach((item) => group.appendChild(createProgressBar(item)));
 	return group;

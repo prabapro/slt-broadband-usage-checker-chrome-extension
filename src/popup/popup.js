@@ -353,14 +353,25 @@ const createUsageDataGroups = (usageData) => {
 
 const updatePagination = () => {
 	const bulletsContainer = document.querySelector('.pagination-bullets');
-
 	bulletsContainer.innerHTML = '';
-	for (let i = 0; i < totalPages; i++) {
-		const bullet = document.createElement('div');
-		bullet.className = `bullet ${i === currentPage ? 'active' : ''}`;
-		bullet.addEventListener('click', () => goToPage(i));
-		bulletsContainer.appendChild(bullet);
-	}
+
+	const groups = document.querySelectorAll('.data-group');
+
+	groups.forEach((group, index) => {
+		const paginationItem = document.createElement('div');
+		paginationItem.className = `pagination-item ${
+			index === currentPage ? 'active' : ''
+		}`;
+
+		const label = document.createElement('span');
+		label.className = 'pagination-label';
+		label.textContent = group.dataset.groupName;
+
+		paginationItem.appendChild(label);
+		paginationItem.addEventListener('click', () => goToPage(index));
+
+		bulletsContainer.appendChild(paginationItem);
+	});
 };
 
 const goToPage = (pageNumber) => {

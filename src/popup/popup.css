@@ -81,8 +81,8 @@ h1 sup {
 }
 
 .status-normal-extra {
-	background-color: #0ca816;
-	color: #fff;
+	background-color: #e8f5e9;
+	color: #1b5e20;
 }
 
 .status-throttled {
@@ -98,6 +98,8 @@ h1 sup {
 .clickable-extra-gb {
 	text-decoration: underline;
 	cursor: pointer;
+	color: purple;
+	font-weight: 600;
 }
 
 main {
@@ -107,28 +109,46 @@ main {
 	overflow: hidden;
 }
 
-.pagination {
-	display: flex;
-	justify-content: center;
-	margin: 15px 0;
-}
-
 .pagination-bullets {
 	display: flex;
-	gap: 15px; /* Space between bullets */
+	gap: 6px; /* Space between items */
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 18px;
 }
 
-.bullet {
-	width: 15px;
-	height: 15px;
-	border-radius: 50%;
-	background-color: #ccc;
+.pagination-item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	cursor: pointer;
-	transition: background-color 0.3s ease;
+	min-width: 80px; /* Ensure a minimum width for consistency */
+	height: 22px; /* Fixed height for all items */
+	border-radius: 15px; /* Rounded corners */
+	border: 1px solid #ffffff; /* Border color */
+	background-color: transparent;
+	transition: background-color 0.3s ease, color 0.3s ease;
+	padding: 0 12px; /* Horizontal padding */
 }
 
-.bullet.active {
-	background-color: #007bff;
+.pagination-item:hover {
+	background-color: rgba(0, 123, 255, 0.1); /* Light blue background on hover */
+}
+
+.pagination-item.active {
+	background-color: #262626; /* Filled background for active item */
+	color: white;
+}
+
+.pagination-label {
+	font-size: 10px;
+	font-weight: 400;
+	white-space: nowrap;
+	color: black; /* Blue text color for inactive items */
+}
+
+.pagination-item.active .pagination-label {
+	color: white; /* White text for active item */
 }
 
 #usage-data {
@@ -275,7 +295,7 @@ button {
 	text-align: center;
 	font-size: 12px;
 	color: #81808095;
-	margin-top: 5px;
+	margin-top: 20px;
 }
 
 #last-updated-time {

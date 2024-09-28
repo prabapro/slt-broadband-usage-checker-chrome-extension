@@ -2,7 +2,7 @@
 
 export const mockData = {
 	reported_time: '28-Sep-2024 04:54 PM',
-	speed_status: 'NORMAL',
+	speed_status: 'THROTTLED', // NORMAL || THROTTLED
 	usage_data: [
 		{
 			claim: null,
