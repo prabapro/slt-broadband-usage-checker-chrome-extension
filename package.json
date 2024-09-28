@@ -9,6 +9,7 @@
 		"build:prod": "npm run clean:dist_zip && cross-env NODE_ENV=production node build.js && npm run unzip:prod",
 		"preview": "vite preview",
 		"clean:dist_zip": "node scripts/cleanFolder.js dist_zip",
+		"clean": "node scripts/cleanFolder.js dist",
 		"unzip:prod": "node scripts/unzipProd.js"
 	},
 	"devDependencies": {
