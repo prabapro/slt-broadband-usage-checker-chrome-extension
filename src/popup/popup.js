@@ -6,6 +6,7 @@ import {
 	getStatusClass,
 	createDataGroup,
 	checkExtraGB,
+	navigateToExtraGBGroup,
 } from '../utils/helpers.js';
 
 const USE_MOCK_DATA = __USE_MOCK_DATA__;
@@ -277,9 +278,25 @@ const updateAccountInfo = (accountId, speedStatus, combinedData) => {
 	if (speedStatusElement && speedStatus) {
 		const hasExtraGB = checkExtraGB(combinedData);
 		const formattedStatus = formatSpeedStatus(speedStatus, hasExtraGB);
-		speedStatusElement.textContent = formattedStatus;
-		speedStatusElement.className = `status-pill ${getStatusClass(speedStatus)}`;
-		console.log('Speed Status:', formattedStatus);
+		const statusClass = getStatusClass(speedStatus, hasExtraGB);
+
+		if (formattedStatus.hasClickable) {
+			speedStatusElement.innerHTML = `${formattedStatus.text}<span class="clickable-extra-gb">${formattedStatus.clickable}</span>`;
+			const clickableElement = speedStatusElement.querySelector(
+				'.clickable-extra-gb'
+			);
+			clickableElement.addEventListener('click', () => {
+				navigateToExtraGBGroup(goToPage);
+			});
+		} else {
+			speedStatusElement.textContent = formattedStatus.text;
+		}
+
+		speedStatusElement.className = `status-pill ${statusClass}`;
+		console.log(
+			'Speed Status:',
+			formattedStatus.text + (formattedStatus.clickable || '')
+		);
 
 		sendEvent('speed_status_checked', {
 			speed_status: speedStatus.toLowerCase(),

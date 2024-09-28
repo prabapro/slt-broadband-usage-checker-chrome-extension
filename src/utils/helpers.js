@@ -52,30 +52,61 @@ export const checkExtraGB = (combinedData) => {
  * Formats the speed status into a readable string, including Extra GB information if applicable.
  * @param {string} status - The speed status to format.
  * @param {boolean} hasExtraGB - Whether the user has remaining Extra GB.
- * @returns {string} The formatted speed status.
+ * @returns {Object} An object containing the formatted status and whether it includes a clickable part.
  */
 export const formatSpeedStatus = (status, hasExtraGB = false) => {
 	const lowerStatus = status.toLowerCase();
 	if (lowerStatus === 'normal') {
-		return hasExtraGB ? 'Speed is Normal with Extra GB' : 'Speed is Normal';
+		if (hasExtraGB) {
+			return {
+				text: 'Speed is Normal with ',
+				clickable: 'Extra GB',
+				hasClickable: true,
+			};
+		}
+		return { text: 'Speed is Normal', hasClickable: false };
 	}
 	if (['throttle', 'throttled'].includes(lowerStatus)) {
-		return 'Speed is Throttled';
+		return { text: 'Speed is Throttled', hasClickable: false };
 	}
-	return `${status.charAt(0).toUpperCase()}${lowerStatus.slice(1)}`;
+	return {
+		text: `${status.charAt(0).toUpperCase()}${lowerStatus.slice(1)}`,
+		hasClickable: false,
+	};
 };
 
 /**
  * Gets the CSS class for a given speed status.
  * @param {string} status - The speed status.
+ * @param {boolean} hasExtraGB - Whether the user has remaining Extra GB.
  * @returns {string} The corresponding CSS class.
  */
-export const getStatusClass = (status) => {
+export const getStatusClass = (status, hasExtraGB = false) => {
 	const lowerStatus = status.toLowerCase();
-	if (lowerStatus === 'normal') return 'status-normal';
+	if (lowerStatus === 'normal')
+		return hasExtraGB ? 'status-normal-extra' : 'status-normal';
 	if (['throttle', 'throttled'].includes(lowerStatus))
 		return 'status-throttled';
 	return 'status-other';
+};
+
+/**
+ * Navigates to the Extra GB group in the usage data display.
+ * @param {Function} goToPage - Function to navigate to a specific page.
+ */
+export const navigateToExtraGBGroup = (goToPage) => {
+	const groups = document.querySelectorAll('.data-group');
+	let extraGBIndex = -1;
+
+	groups.forEach((group, index) => {
+		if (group.dataset.groupName === 'Extra GB') {
+			extraGBIndex = index;
+		}
+	});
+
+	if (extraGBIndex !== -1) {
+		goToPage(extraGBIndex);
+	}
 };
 
 /**
