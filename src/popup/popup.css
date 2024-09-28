@@ -107,28 +107,46 @@ main {
 	overflow: hidden;
 }
 
-.pagination {
-	display: flex;
-	justify-content: center;
-	margin: 15px 0;
-}
-
 .pagination-bullets {
 	display: flex;
-	gap: 15px; /* Space between bullets */
+	gap: 10px; /* Space between items */
+	align-items: center;
+	justify-content: center;
+	margin-top: 15px;
 }
 
-.bullet {
-	width: 15px;
-	height: 15px;
-	border-radius: 50%;
-	background-color: #ccc;
+.pagination-item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	cursor: pointer;
-	transition: background-color 0.3s ease;
+	min-width: 80px; /* Ensure a minimum width for consistency */
+	height: 30px; /* Fixed height for all items */
+	border-radius: 15px; /* Rounded corners */
+	border: 2px solid #007bff; /* Border color */
+	background-color: transparent;
+	transition: background-color 0.3s ease, color 0.3s ease;
+	padding: 0 10px; /* Horizontal padding */
 }
 
-.bullet.active {
-	background-color: #007bff;
+.pagination-item:hover {
+	background-color: rgba(0, 123, 255, 0.1); /* Light blue background on hover */
+}
+
+.pagination-item.active {
+	background-color: #007bff; /* Filled background for active item */
+	color: white;
+}
+
+.pagination-label {
+	font-size: 12px;
+	font-weight: 500;
+	white-space: nowrap;
+	color: #007bff; /* Blue text color for inactive items */
+}
+
+.pagination-item.active .pagination-label {
+	color: white; /* White text for active item */
 }
 
 #usage-data {
