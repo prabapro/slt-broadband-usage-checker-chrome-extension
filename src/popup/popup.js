@@ -286,7 +286,13 @@ const updateAccountInfo = (accountId, speedStatus, combinedData) => {
 				'.clickable-extra-gb'
 			);
 			clickableElement.addEventListener('click', () => {
-				navigateToExtraGBGroup(goToPage);
+				navigateToExtraGBGroup(
+					goToPage,
+					sendEvent('extra_gb_link_clicked', {
+						action: 'navigation',
+						group_name: 'Extra GB',
+					})
+				);
 			});
 		} else {
 			speedStatusElement.textContent = formattedStatus.text;

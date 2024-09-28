@@ -80,14 +80,9 @@ h1 sup {
 	color: #1b5e20;
 }
 
-.clickable-extra-gb {
-	text-decoration: underline;
-	cursor: pointer;
-}
-
 .status-normal-extra {
-	background-color: #4caf50;
-	color: white;
+	background-color: #0ca816;
+	color: #fff;
 }
 
 .status-throttled {
@@ -98,6 +93,11 @@ h1 sup {
 .status-other {
 	background-color: #e0e0e0;
 	color: #424242;
+}
+
+.clickable-extra-gb {
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 main {
