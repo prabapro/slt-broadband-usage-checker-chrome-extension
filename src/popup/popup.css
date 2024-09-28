@@ -109,10 +109,10 @@ main {
 
 .pagination-bullets {
 	display: flex;
-	gap: 10px; /* Space between items */
+	gap: 6px; /* Space between items */
 	align-items: center;
 	justify-content: center;
-	margin-top: 15px;
+	margin-bottom: 18px;
 }
 
 .pagination-item {
@@ -121,12 +121,12 @@ main {
 	justify-content: center;
 	cursor: pointer;
 	min-width: 80px; /* Ensure a minimum width for consistency */
-	height: 30px; /* Fixed height for all items */
+	height: 24px; /* Fixed height for all items */
 	border-radius: 15px; /* Rounded corners */
-	border: 2px solid #007bff; /* Border color */
+	border: 1px solid #ffffff; /* Border color */
 	background-color: transparent;
 	transition: background-color 0.3s ease, color 0.3s ease;
-	padding: 0 10px; /* Horizontal padding */
+	padding: 0 12px; /* Horizontal padding */
 }
 
 .pagination-item:hover {
@@ -134,15 +134,16 @@ main {
 }
 
 .pagination-item.active {
-	background-color: #007bff; /* Filled background for active item */
+	background-color: #262626; /* Filled background for active item */
 	color: white;
 }
 
 .pagination-label {
-	font-size: 12px;
+	font-size: 11px;
 	font-weight: 500;
 	white-space: nowrap;
-	color: #007bff; /* Blue text color for inactive items */
+	color: black; /* Blue text color for inactive items */
+	text-transform: uppercase;
 }
 
 .pagination-item.active .pagination-label {
