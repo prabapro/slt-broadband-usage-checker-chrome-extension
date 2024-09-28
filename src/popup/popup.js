@@ -177,6 +177,7 @@ const checkUsage = async (forceRefresh = false) => {
 		) {
 			console.log('Using cached data');
 			sendEvent('usage_checked', { data_source: 'cache' });
+			checkExtraGB(cachedData);
 			displayUsageData(cachedData, subscriberId);
 		} else {
 			console.log('Fetching fresh data');
@@ -205,6 +206,8 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 			)
 		);
 		console.log('Mock data and subscriberId cached successfully');
+		console.log('Calling checkExtraGB with mock data');
+		checkExtraGB(data);
 		displayUsageData(data, subscriberId || 'MockSubscriberId');
 		return;
 	}
@@ -232,6 +235,8 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 		};
 
 		console.log('Combined Data:', combinedData);
+		console.log('Calling checkExtraGB with real data');
+		checkExtraGB(combinedData);
 
 		const timestamp = Date.now();
 		await new Promise((resolve) =>
@@ -254,6 +259,39 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 			'Error fetching data. Your session might have expired. Please try re-login.'
 		);
 	}
+};
+
+const checkExtraGB = (combinedData) => {
+	console.log('checkExtraGB function called');
+	console.log('combinedData:', combinedData);
+
+	if (!combinedData || !combinedData.usage_data) {
+		console.log('No valid usage data found in combinedData');
+		return;
+	}
+
+	const extraGBData = combinedData.usage_data.filter(
+		(item) => item.service_name === 'Extra GB'
+	);
+	console.log('Filtered Extra GB data:', extraGBData);
+
+	if (extraGBData.length === 0) {
+		console.log('No Extra GB packages found.');
+		return;
+	}
+
+	extraGBData.forEach((pkg) => {
+		const remaining = parseFloat(pkg.remaining);
+		if (remaining > 0) {
+			console.log(
+				`Extra GB package '${pkg.name}' found with ${remaining} ${pkg.volume_unit} remaining.`
+			);
+		} else {
+			console.log(
+				`Extra GB package '${pkg.name}' found, but no data remaining.`
+			);
+		}
+	});
 };
 
 const displayUsageData = (data, subscriberId) => {
