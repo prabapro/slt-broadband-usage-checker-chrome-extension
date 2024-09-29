@@ -17,31 +17,78 @@ try {
 	const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 	const version = packageJson.version;
 
-	// Generate markdown content
-	let markdownContent = `# Test Results for v${version}\n\n`;
-	markdownContent += `Date: ${new Date().toISOString()}\n\n`;
-	markdownContent += `Total Tests: ${results.numTotalTests}\n`;
-	markdownContent += `Passed: ${results.numPassedTests}\n`;
-	markdownContent += `Failed: ${results.numFailedTests}\n\n`;
+	// Generate HTML content
+	let htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results for v${version}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
+        h1 { color: #333; }
+        h2 { color: #666; }
+        .pass { color: green; }
+        .fail { color: red; }
+        .test-file { margin-bottom: 20px; }
+        .test-suite { margin-left: 20px; }
+        .test-case { margin-left: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Test Results for v${version}</h1>
+    <p>Date: ${new Date().toISOString()}</p>
+    <p>Total Tests: ${results.numTotalTests}</p>
+    <p>Passed: ${results.numPassedTests}</p>
+    <p>Failed: ${results.numFailedTests}</p>
+    <h2>Test Details</h2>
+`;
 
-	// Add details for failed tests
-	if (results.numFailedTests > 0) {
-		markdownContent += `## Failed Tests\n\n`;
-		results.testResults.forEach((testFile) => {
-			testFile.assertionResults.forEach((test) => {
-				if (test.status === 'failed') {
-					markdownContent += `- ${test.fullName}\n`;
-					markdownContent += `  Error: ${test.failureMessages.join('\n')}\n\n`;
+	results.testResults.forEach((testFile) => {
+		const relativePath = path.relative(process.cwd(), testFile.name);
+		htmlContent += `<div class="test-file"><h3>${relativePath}</h3>`;
+
+		let currentDescribe = '';
+		testFile.assertionResults.forEach((test) => {
+			const testTitles = test.ancestorTitles.concat(test.title);
+			const describeBlock =
+				testTitles.length > 1 ? testTitles[testTitles.length - 2] : '';
+
+			if (describeBlock !== currentDescribe) {
+				if (currentDescribe !== '') {
+					htmlContent += `</div>`; // Close previous test suite
 				}
-			});
+				currentDescribe = describeBlock;
+				htmlContent += `<div class="test-suite"><h4>${currentDescribe}</h4>`;
+			}
+
+			const status = test.status === 'passed' ? 'pass' : 'fail';
+			htmlContent += `<div class="test-case ${status}">
+        ${test.status === 'passed' ? '✓' : '✗'} ${test.title} (${
+				test.duration
+			}ms)
+      </div>`;
+
+			if (test.status === 'failed') {
+				htmlContent += `<div class="error">Error: ${test.failureMessages.join(
+					'<br>'
+				)}</div>`;
+			}
 		});
-	}
+
+		htmlContent += `</div></div>`; // Close last test suite and test file
+	});
+
+	htmlContent += `
+</body>
+</html>`;
 
 	// Write to file
-	const fileName = `test-results-v${version}.md`;
+	const fileName = `index.html`;
 	const filePath = path.join('test-results', fileName);
 	fs.mkdirSync('test-results', { recursive: true });
-	fs.writeFileSync(filePath, markdownContent);
+	fs.writeFileSync(filePath, htmlContent);
 
 	console.log(`Test results written to ${filePath}`);
 
