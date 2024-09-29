@@ -161,13 +161,14 @@ const formatExpiryDate = (dateString) => {
  */
 const getStatusText = (
 	isExceeded,
+	isFullyUsed,
 	remainingPercentage,
 	remainingBalance,
 	quotaUnit,
 	expiryDate
 ) => {
 	if (isExceeded) return 'Quota exceeded';
-	if (remainingPercentage === 0) return 'Quota fully used';
+	if (isFullyUsed) return 'Quota fully used';
 	const formattedExpiryDate = formatExpiryDate(expiryDate);
 	return `<strong>${remainingBalance} ${quotaUnit}</strong> <small class="remaining-amount">(${formatNumber(
 		remainingPercentage
@@ -179,7 +180,7 @@ const getStatusText = (
  * @param {number} percentage - The usage percentage.
  * @returns {string} The CSS class for the progress bar fill.
  */
-const getFillClass = (percentage) => {
+export const getFillClass = (percentage) => {
 	if (percentage >= 100) return 'fill-exceeded';
 	if (percentage < 25) return 'fill-low';
 	if (percentage < 50) return 'fill-medium';
@@ -197,7 +198,7 @@ const getFillClass = (percentage) => {
  * @param {string} data.expiry_date - The expiry date of the package.
  * @returns {HTMLElement} The created progress bar element.
  */
-const createProgressBar = (data) => {
+export const createProgressBar = (data) => {
 	const {
 		used,
 		limit,
@@ -215,38 +216,36 @@ const createProgressBar = (data) => {
 	const remainingPercentage = Math.max(0, 100 - usedPercentage);
 
 	const isExceeded = usedAmount > totalAmount;
-	const isFullyUsed = usedAmount === totalAmount;
-	const statusText = getStatusText(
-		isExceeded,
-		remainingPercentage,
-		remainingBalance,
-		quotaUnit,
-		expiryDate
-	);
-	const fillClass = getFillClass(usedPercentage);
+	const isFullyUsed = usedAmount >= totalAmount;
 
 	const progressBar = document.createElement('div');
 	progressBar.className = 'progress-bar';
 	progressBar.innerHTML = `
-	  <h3>${name}</h3>
-	  <div class="bar">
-		<div class="fill ${fillClass}" style="width: ${Math.min(
-		usedPercentage,
-		100
-	)}%"></div>
-	  </div>
-	  <div class="progress-info">
-		<span>
-		  <span class="usage-amount">${formatNumber(usedAmount)} ${quotaUnit}</span>
-		  <span class="total-amount"><small>of ${formatNumber(
-				totalAmount
-			)} ${quotaUnit} used</small></span>
-		</span>
-		<span class="${
-			isExceeded || isFullyUsed ? 'exceeded' : ''
-		}">${statusText}</span>
-	  </div>
-	`;
+        <h3>${name}</h3>
+        <div class="bar">
+            <div class="fill ${getFillClass(
+							usedPercentage
+						)}" style="width: ${Math.min(usedPercentage, 100)}%"></div>
+        </div>
+        <div class="progress-info">
+            <span class="usage-info">
+                ${formatNumber(usedAmount, 2)} ${quotaUnit} of ${formatNumber(
+		totalAmount,
+		2
+	)} ${quotaUnit} used
+            </span>
+            <span class="status ${isExceeded || isFullyUsed ? 'exceeded' : ''}">
+                ${getStatusText(
+									isExceeded,
+									isFullyUsed,
+									remainingPercentage,
+									remainingBalance,
+									quotaUnit,
+									expiryDate
+								).trim()}
+            </span>
+        </div>
+    `;
 
 	return progressBar;
 };

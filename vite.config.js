@@ -38,6 +38,7 @@ export default defineConfig(({ command, mode }) => {
 					chunkFileNames: 'shared/[name].[hash].js',
 					assetFileNames: 'assets/[name].[ext]',
 				},
+				external: [/\/__tests__\//, /\.test\.js$/, /\.spec\.js$/],
 			},
 		},
 		plugins: [
