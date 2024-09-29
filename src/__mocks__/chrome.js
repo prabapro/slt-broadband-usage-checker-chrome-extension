@@ -1,4 +1,4 @@
-// File: src/__mocks__/chrome.js
+// src/__mocks__/chrome.js
 
 export const chrome = {
 	storage: {

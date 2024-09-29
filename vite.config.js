@@ -1,3 +1,5 @@
+// vite.config.js
+
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import fs from 'fs-extra';

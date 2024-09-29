@@ -8,13 +8,14 @@
 		"build": "node build.js",
 		"build:prod": "npm run clean:dist_zip && cross-env NODE_ENV=production node build.js && npm run unzip:prod",
 		"preview": "vite preview",
+		"clean:dist": "node scripts/cleanFolder.js dist",
 		"clean:dist_zip": "node scripts/cleanFolder.js dist_zip",
-		"clean": "node scripts/cleanFolder.js dist",
+		"clean:final": "node scripts/cleanFolder.js __final__",
 		"unzip:prod": "node scripts/unzipProd.js",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
-		"copy-files": "node copy-source-files.js"
+		"copy-files": "npm run clean:final && node copy-source-files.js"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.2",

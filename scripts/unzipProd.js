@@ -1,3 +1,5 @@
+// scripts/unzipProd.js
+
 import fs from 'fs-extra';
 import path from 'path';
 import AdmZip from 'adm-zip';

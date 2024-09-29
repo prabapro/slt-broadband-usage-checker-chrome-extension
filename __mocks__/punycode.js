@@ -1,4 +1,4 @@
-// File: __mocks__/punycode.js
+// __mocks__/punycode.js
 
 module.exports = {
 	// Add any methods from punycode that your code might be using

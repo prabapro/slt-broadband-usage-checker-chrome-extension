@@ -1,3 +1,5 @@
+// copy-source-files.js
+
 import cpx from 'cpx2';
 import path from 'path';
 import fs from 'fs-extra';

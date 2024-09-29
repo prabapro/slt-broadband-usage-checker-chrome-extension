@@ -1,4 +1,4 @@
-// File: src/utils/__tests__/helpers.test.js
+// src/utils/__tests__/helpers.test.js
 
 import {
 	formatSubscriberId,
