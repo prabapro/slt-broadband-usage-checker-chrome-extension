@@ -11,6 +11,7 @@
 │   ├── cleanFolder.js
 │   ├── copySourceFiles.js
 │   ├── generateTree.js
+│   ├── runTestsAndGenerateReport.js
 │   └── unzipProd.js
 ├── src
 │   ├── __mocks__
@@ -28,8 +29,7 @@
 │   │   └── analytics.js
 │   └── utils
 │       ├── __tests__
+│       │   └── helpers.test.js
 │       ├── helpers.js
 │       └── mockData.js
 └── vite.config.js
-
-...
