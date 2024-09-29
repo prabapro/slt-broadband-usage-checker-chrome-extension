@@ -3,18 +3,18 @@
 import cpx from 'cpx2';
 import path from 'path';
 import fs from 'fs-extra';
+import chalk from 'chalk';
+import Table from 'cli-table3';
 
-// Define source and destination directories
 const source = '**/*';
 const destination = '__final__';
 
-// Use cpx to copy files
 cpx.copy(
 	source,
 	destination,
 	{
-		clean: true, // Clean the destination folder before copying
-		includeEmptyDirs: false, // Don't include empty directories
+		clean: true,
+		includeEmptyDirs: false,
 		ignore: [
 			'copy-source-files.js',
 			'dist/**/*',
@@ -31,37 +31,67 @@ cpx.copy(
 			'public/images/**/*',
 		],
 	},
-	(err) => {
+	async (err) => {
 		if (err) {
 			console.error('Error during copying:', err);
 			return;
 		}
 
-		// Move files from subdirectories to the root of __final__
-		flattenDirectory(destination);
+		await flattenDirectory(destination);
+		const copiedFiles = await getUniqueFiles(destination);
+		printSummary(copiedFiles);
 	}
 );
 
-// Function to flatten the copied directory
 async function flattenDirectory(directory) {
-	const files = await fs.readdir(directory, { withFileTypes: true });
+	const items = await fs.readdir(directory, { withFileTypes: true });
 
-	for (const file of files) {
-		const fullPath = path.join(directory, file.name);
+	for (const item of items) {
+		const fullPath = path.join(directory, item.name);
 
-		if (file.isDirectory()) {
-			await flattenDirectory(fullPath); // Recursively flatten subdirectories
+		if (item.isDirectory()) {
+			await flattenDirectory(fullPath);
 
-			const innerFiles = await fs.readdir(fullPath);
+			const innerItems = await fs.readdir(fullPath);
 
-			for (const innerFile of innerFiles) {
-				const innerFilePath = path.join(fullPath, innerFile);
-				const destinationPath = path.join(directory, innerFile);
+			for (const innerItem of innerItems) {
+				const innerPath = path.join(fullPath, innerItem);
+				const destPath = path.join(directory, innerItem);
 
-				await fs.move(innerFilePath, destinationPath);
+				if ((await fs.stat(innerPath)).isFile()) {
+					await fs.move(innerPath, destPath, { overwrite: true });
+				}
 			}
 
 			await fs.rmdir(fullPath);
 		}
 	}
+}
+
+async function getUniqueFiles(directory) {
+	const files = await fs.readdir(directory);
+	return files.filter(async (file) => {
+		const stat = await fs.stat(path.join(directory, file));
+		return stat.isFile();
+	});
+}
+
+function printSummary(copiedFiles) {
+	const table = new Table({
+		head: [
+			chalk.cyan('Destination Folder'),
+			chalk.cyan('Files Copied'),
+			chalk.cyan('File Names'),
+		],
+		colWidths: [25, 15, 50],
+		wordWrap: true,
+	});
+
+	table.push([
+		chalk.green(destination),
+		chalk.yellow(copiedFiles.length),
+		chalk.magenta(copiedFiles.join('\n')),
+	]);
+
+	console.log(table.toString());
 }
