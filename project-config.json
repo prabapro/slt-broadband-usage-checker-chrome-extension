@@ -15,8 +15,7 @@
 			"copy-source-files.js",
 			"package-lock.json",
 			"README.md",
-			"tree.txt",
-			"*.test.js"
+			"tree.txt"
 		],
 		"system": [".git", ".gitignore", ".DS_Store", "Thumbs.db", ".env", ".env.*"]
 	}

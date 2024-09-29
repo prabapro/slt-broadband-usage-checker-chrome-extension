@@ -14,4 +14,5 @@ export default {
 	testEnvironmentOptions: {
 		customExportConditions: ['node', 'node-addons'],
 	},
+	testPathIgnorePatterns: ['<rootDir>/.*/__final__/.*', '<rootDir>/__final__/'],
 };
