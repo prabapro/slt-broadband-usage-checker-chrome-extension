@@ -26,6 +26,8 @@
 │   │   ├── popup.html
 │   │   └── popup.js
 │   ├── services
+│   │   ├── __tests__
+│   │   │   └── analytics.test.js
 │   │   └── analytics.js
 │   └── utils
 │       ├── __tests__
