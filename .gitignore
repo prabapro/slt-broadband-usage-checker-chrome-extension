@@ -7,12 +7,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node
 node_modules
-dist
-dist-ssr
-dist_zip
-*.local
-!public
 
 # Editor directories and files
 !*.code-workspace
@@ -26,7 +22,19 @@ dist_zip
 *.sln
 *.sw?
 
+# Environment variables
 .env*
 .flaskenv*
 !.env.project
 !.env.vault
+
+
+# Build artifacts
+dist
+dist-ssr
+dist_zip
+*.local
+!public
+
+# Test coverage
+coverage
