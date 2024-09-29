@@ -7,7 +7,7 @@
 			"coverage",
 			"public/images",
 			"resources",
-			"__final__"
+			"__copied_files__"
 		],
 		"files": [
 			"*.code-workspace",

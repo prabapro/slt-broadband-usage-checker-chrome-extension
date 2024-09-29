@@ -35,7 +35,7 @@ dist-ssr
 dist_zip
 *.local
 !public
-/__final__
+/__copied_files__
 
 # Test coverage
 coverage

@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"clean": "node scripts/cleanFolder.js dist dist_zip",
-		"clean:final": "node scripts/cleanFolder.js __final__",
+		"clean:copied-files": "node scripts/cleanFolder.js __copied_files__",
 		"prebuild": "npm run clean",
 		"build": "node build.js",
 		"postbuild": "npm run copy-files && npm run generate-tree",
@@ -16,7 +16,7 @@
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
-		"copy-files": "npm run clean:final && node scripts/copySourceFiles.js",
+		"copy-files": "npm run clean:copied-files && node scripts/copySourceFiles.js",
 		"generate-tree": "node scripts/generateTree.js"
 	},
 	"devDependencies": {

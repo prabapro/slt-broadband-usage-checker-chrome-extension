@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import Table from 'cli-table3';
 
 const source = '**/*';
-const destination = '__final__';
+const destination = '__copied_files__';
 
 const fileTypeNames = {
 	'.css': 'Styles',
