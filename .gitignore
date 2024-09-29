@@ -9,7 +9,6 @@ lerna-debug.log*
 
 # Node
 node_modules
-!.package-lock.json
 
 # Editor directories and files
 !*.code-workspace
