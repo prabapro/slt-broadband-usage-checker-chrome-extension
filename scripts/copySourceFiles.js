@@ -1,5 +1,3 @@
-// copy-source-files.js
-
 import cpx from 'cpx2';
 import path from 'path';
 import fs from 'fs-extra';
@@ -24,44 +22,44 @@ const fileTypeNames = {
 	'': 'Other',
 };
 
-cpx.copy(
-	source,
-	destination,
-	{
-		clean: true,
-		includeEmptyDirs: false,
-		ignore: [
-			// Directories
-			'coverage/**/*',
-			'dist/**/*',
-			'dist_zip/**/*',
-			'node_modules/**/*',
-			'public/images/**/*',
-			'resources/**/*',
+async function readProjectConfig() {
+	const configPath = path.join(process.cwd(), 'project-config.json');
+	const configFile = await fs.readFile(configPath, 'utf8');
+	return JSON.parse(configFile).ignore;
+}
 
-			// Files
-			'.env.me',
-			'.env.vault',
-			'*.code-workspace',
-			'available-in-chrome.png',
-			'copy-source-files.js',
-			'package-lock.json',
-			'README.md',
-			'tree.txt',
-		],
-	},
-	async (err) => {
-		if (err) {
-			console.error('Error during copying:', err);
-			return;
-		}
+async function copySourceFiles() {
+	try {
+		const ignoreConfig = await readProjectConfig();
 
-		await flattenDirectory(destination);
-		const copiedFiles = await getUniqueFiles(destination);
-		const groupedFiles = groupFilesByType(copiedFiles);
-		printSummary(groupedFiles);
+		cpx.copy(
+			source,
+			destination,
+			{
+				clean: true,
+				includeEmptyDirs: false,
+				ignore: [
+					...ignoreConfig.directories.map((dir) => `${dir}/**/*`),
+					...ignoreConfig.files,
+					...ignoreConfig.system,
+				],
+			},
+			async (err) => {
+				if (err) {
+					console.error('Error during copying:', err);
+					return;
+				}
+
+				await flattenDirectory(destination);
+				const copiedFiles = await getUniqueFiles(destination);
+				const groupedFiles = groupFilesByType(copiedFiles);
+				printSummary(groupedFiles);
+			}
+		);
+	} catch (err) {
+		console.error('Error:', err);
 	}
-);
+}
 
 async function flattenDirectory(directory) {
 	const items = await fs.readdir(directory, { withFileTypes: true });
@@ -154,3 +152,5 @@ function printSummary(groupedFiles) {
 
 	console.log(table.toString());
 }
+
+copySourceFiles();

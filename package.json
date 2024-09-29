@@ -5,17 +5,19 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "node build.js",
-		"build:prod": "npm run clean:dist_zip && cross-env NODE_ENV=production node build.js && npm run unzip:prod",
-		"preview": "vite preview",
-		"clean:dist": "node scripts/cleanFolder.js dist",
-		"clean:dist_zip": "node scripts/cleanFolder.js dist_zip",
+		"clean": "node scripts/cleanFolder.js dist dist_zip",
 		"clean:final": "node scripts/cleanFolder.js __final__",
+		"prebuild": "npm run clean",
+		"build": "node build.js",
+		"postbuild": "npm run copy-files && npm run generate-tree",
+		"build:prod": "cross-env NODE_ENV=production npm run build && npm run unzip:prod",
+		"preview": "vite preview",
 		"unzip:prod": "node scripts/unzipProd.js",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
-		"copy-files": "npm run clean:final && node copy-source-files.js && tree --prune -I 'dist|dist_zip|node_modules|package-lock.json|available-in-chrome.png|README.md|.env.me|.env.vault|*.code-workspace|resources|coverage|images|__final__' | sed '$d' > tree.txt"
+		"copy-files": "npm run clean:final && node scripts/copySourceFiles.js",
+		"generate-tree": "node scripts/generateTree.js"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.2",

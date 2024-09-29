@@ -1,0 +1,23 @@
+{
+	"ignore": {
+		"directories": [
+			"node_modules",
+			"dist",
+			"dist_zip",
+			"coverage",
+			"public/images",
+			"resources",
+			"__final__"
+		],
+		"files": [
+			"*.code-workspace",
+			"available-in-chrome.png",
+			"copy-source-files.js",
+			"package-lock.json",
+			"README.md",
+			"tree.txt",
+			"*.test.js"
+		],
+		"system": [".git", ".gitignore", ".DS_Store", "Thumbs.db", ".env", ".env.*"]
+	}
+}

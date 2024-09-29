@@ -1,47 +1,60 @@
-// scripts/cleanFolder.js
-
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 
-const folderToClean = process.argv[2];
+const foldersToClean = process.argv.slice(2);
 
-if (!folderToClean) {
-	console.error(chalk.red('Please specify a folder to clean'));
+if (foldersToClean.length === 0) {
+	console.error(chalk.red('Please specify at least one folder to clean'));
 	process.exit(1);
 }
 
-const folderPath = path.resolve(process.cwd(), folderToClean);
+let totalItemsRemoved = 0;
 
-try {
-	// Ensure the directory exists
-	fs.ensureDirSync(folderPath);
+for (const folderToClean of foldersToClean) {
+	const folderPath = path.resolve(process.cwd(), folderToClean);
 
-	// Read the contents of the directory
-	const files = fs.readdirSync(folderPath);
+	try {
+		// Ensure the directory exists
+		fs.ensureDirSync(folderPath);
 
-	console.log(
-		chalk.cyan(`\nCleaning folder: ${chalk.yellow(folderToClean)}\n`)
-	);
+		// Read the contents of the directory
+		const files = fs.readdirSync(folderPath);
 
-	// Remove each file/directory inside
-	for (const file of files) {
-		const filePath = path.join(folderPath, file);
-		fs.removeSync(filePath);
 		console.log(
-			`${chalk.red('Removed:')} ${chalk.magenta(
-				path.join(path.basename(folderPath), file)
-			)}`
+			chalk.cyan(`\nCleaning folder: ${chalk.yellow(folderToClean)}`)
+		);
+
+		// Remove each file/directory inside
+		for (const file of files) {
+			const filePath = path.join(folderPath, file);
+			fs.removeSync(filePath);
+			console.log(
+				`${chalk.red('Removed:')} ${chalk.magenta(
+					path.join(path.basename(folderPath), file)
+				)}`
+			);
+		}
+
+		console.log(
+			chalk.green(
+				`\nSuccessfully cleaned folder: ${chalk.yellow(folderToClean)}`
+			)
+		);
+		console.log(chalk.green(`Items removed: ${chalk.yellow(files.length)}`));
+
+		totalItemsRemoved += files.length;
+	} catch (error) {
+		console.error(
+			chalk.red(`\nError cleaning folder ${folderToClean}: ${error.message}`)
 		);
 	}
-
-	console.log(
-		chalk.green(`\nSuccessfully cleaned folder: ${chalk.yellow(folderToClean)}`)
-	);
-	console.log(
-		chalk.green(`Total items removed: ${chalk.yellow(files.length)}`)
-	);
-} catch (error) {
-	console.error(chalk.red(`\nError cleaning folder: ${error.message}`));
-	process.exit(1);
 }
+
+console.log(
+	chalk.green(
+		`\nTotal items removed across all folders: ${chalk.yellow(
+			totalItemsRemoved
+		)}`
+	)
+);
