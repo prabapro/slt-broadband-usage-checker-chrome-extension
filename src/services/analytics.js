@@ -10,23 +10,13 @@ const DEFAULT_ENGAGEMENT_TIME_IN_MSEC = 100;
 const DISPLAY_VERSION = __APP_VERSION__;
 
 // Generate a unique client ID for each extension installation
-const generateUUID =
-	process.env.NODE_ENV === 'test'
-		? () => 'mocked-uuid'
-		: () =>
-				'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-					var r = (Math.random() * 16) | 0,
-						v = c == 'x' ? r : (r & 0x3) | 0x8;
-					return v.toString(16);
-				});
-
-export function getOrCreateClientId() {
+function getOrCreateClientId() {
 	return new Promise((resolve) => {
 		chrome.storage.local.get(['clientId'], (result) => {
 			if (result.clientId) {
 				resolve(result.clientId);
 			} else {
-				const newClientId = generateUUID();
+				const newClientId = self.crypto.randomUUID();
 				chrome.storage.local.set({ clientId: newClientId }, () => {
 					resolve(newClientId);
 				});
@@ -36,38 +26,33 @@ export function getOrCreateClientId() {
 }
 
 // Get or create a session ID
-export async function getOrCreateSessionId() {
-	return new Promise((resolve) => {
-		chrome.storage.session.get('sessionData', (result) => {
-			const currentTimeInMs = Date.now();
-			let sessionData = result.sessionData;
+async function getOrCreateSessionId() {
+	let { sessionData } = await chrome.storage.session.get('sessionData');
+	const currentTimeInMs = Date.now();
 
-			if (sessionData && sessionData.timestamp) {
-				const durationInMin = (currentTimeInMs - sessionData.timestamp) / 60000;
-				if (durationInMin > SESSION_EXPIRATION_IN_MIN) {
-					sessionData = null;
-				} else {
-					// Update the timestamp for existing sessions
-					sessionData.timestamp = currentTimeInMs;
-				}
-			}
+	if (sessionData && sessionData.timestamp) {
+		const durationInMin = (currentTimeInMs - sessionData.timestamp) / 60000;
+		if (durationInMin > SESSION_EXPIRATION_IN_MIN) {
+			sessionData = null;
+		} else {
+			sessionData.timestamp = currentTimeInMs;
+			await chrome.storage.session.set({ sessionData });
+		}
+	}
 
-			if (!sessionData) {
-				sessionData = {
-					session_id: currentTimeInMs.toString(),
-					timestamp: currentTimeInMs,
-				};
-			}
+	if (!sessionData) {
+		sessionData = {
+			session_id: currentTimeInMs.toString(),
+			timestamp: currentTimeInMs,
+		};
+		await chrome.storage.session.set({ sessionData });
+	}
 
-			chrome.storage.session.set({ sessionData }, () => {
-				resolve(sessionData.session_id);
-			});
-		});
-	});
+	return sessionData.session_id;
 }
 
 // Send page view event to GA4
-export async function sendPageView(pageTitle, pageLocation) {
+async function sendPageView(pageTitle, pageLocation) {
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
@@ -106,7 +91,7 @@ export async function sendPageView(pageTitle, pageLocation) {
 }
 
 // Send event to GA4
-export async function sendEvent(name, params = {}) {
+async function sendEvent(name, params = {}) {
 	const clientId = await getOrCreateClientId();
 	const sessionId = await getOrCreateSessionId();
 
@@ -143,3 +128,5 @@ export async function sendEvent(name, params = {}) {
 		console.error('Error sending event to GA4:', error);
 	}
 }
+
+export { sendPageView, sendEvent };
