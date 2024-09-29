@@ -31,19 +31,23 @@ cpx.copy(
 		clean: true,
 		includeEmptyDirs: false,
 		ignore: [
-			'copy-source-files.js',
+			// Directories
+			'coverage/**/*',
 			'dist/**/*',
 			'dist_zip/**/*',
 			'node_modules/**/*',
-			'package-lock.json',
-			'available-in-chrome.png',
-			'README.md',
+			'public/images/**/*',
+			'resources/**/*',
+
+			// Files
 			'.env.me',
 			'.env.vault',
 			'*.code-workspace',
-			'resources/**/*',
-			'coverage/**/*',
-			'public/images/**/*',
+			'available-in-chrome.png',
+			'copy-source-files.js',
+			'package-lock.json',
+			'README.md',
+			'tree.txt',
 		],
 	},
 	async (err) => {

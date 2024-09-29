@@ -1,0 +1,35 @@
+.
+├── __mocks__
+│   └── punycode.js
+├── build.js
+├── copy-source-files.js
+├── jest.config.js
+├── jest.setup.js
+├── package.json
+├── public
+│   └── manifest.json
+├── scripts
+│   ├── cleanFolder.js
+│   └── unzipProd.js
+├── src
+│   ├── __mocks__
+│   │   └── chrome.js
+│   ├── background
+│   │   ├── background.js
+│   │   └── eventHandler.js
+│   ├── content
+│   │   └── content.js
+│   ├── popup
+│   │   ├── popup.css
+│   │   ├── popup.html
+│   │   └── popup.js
+│   ├── services
+│   │   └── analytics.js
+│   └── utils
+│       ├── __tests__
+│       │   └── helpers.test.js
+│       ├── helpers.js
+│       └── mockData.js
+├── tree.txt
+└── vite.config.js
+

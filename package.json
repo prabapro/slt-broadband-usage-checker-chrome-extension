@@ -15,7 +15,7 @@
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
-		"copy-files": "npm run clean:final && node copy-source-files.js"
+		"copy-files": "npm run clean:final && node copy-source-files.js && tree --prune -I 'dist|dist_zip|node_modules|package-lock.json|available-in-chrome.png|README.md|.env.me|.env.vault|*.code-workspace|resources|coverage|images|__final__' | sed '$d' > tree.txt"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.2",
