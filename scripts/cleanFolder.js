@@ -1,3 +1,5 @@
+// scripts/cleanFolder.js
+
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
