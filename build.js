@@ -104,7 +104,7 @@ async function build() {
 
 	const isProduction = process.env.NODE_ENV === 'production';
 	const useMockData = !isProduction && process.env.USE_MOCK_DATA === 'true';
-	const displayVersion = isProduction ? baseVersion : `${baseVersion}-dev`;
+	const displayVersion = isProduction ? baseVersion : `${baseVersion}-d`;
 
 	console.log(`Building version ${displayVersion}...`);
 
@@ -128,10 +128,7 @@ async function build() {
 	const correctPopupPath = path.join(distDir, 'popup.html');
 	if (await fs.pathExists(wrongPopupPath)) {
 		let popupHtml = await fs.readFile(wrongPopupPath, 'utf-8');
-		popupHtml = popupHtml.replace(
-			/v\d+\.\d+\.\d+(-dev)?/g,
-			`v${displayVersion}`
-		);
+		popupHtml = popupHtml.replace(/v\d+\.\d+\.\d+(-d)?/g, `v${displayVersion}`);
 		popupHtml = await minifyHtml(popupHtml);
 		await fs.writeFile(correctPopupPath, popupHtml);
 		await fs.remove(wrongPopupPath);
