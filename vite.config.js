@@ -11,10 +11,8 @@ const baseVersion = packageJson.version;
 export default defineConfig(({ command, mode }) => {
 	const isProduction = mode === 'production';
 	const useMockData = !isProduction && process.env.USE_MOCK_DATA === 'true';
-	const displayVersion = isProduction ? baseVersion : `${baseVersion}-dev`;
-	const uiDisplayVersion = useMockData
-		? `${displayVersion}-mock`
-		: displayVersion;
+	const displayVersion = isProduction ? baseVersion : `${baseVersion}-d`;
+	const uiDisplayVersion = useMockData ? `${displayVersion}-m` : displayVersion;
 
 	return {
 		define: {
@@ -38,6 +36,7 @@ export default defineConfig(({ command, mode }) => {
 					chunkFileNames: 'shared/[name].[hash].js',
 					assetFileNames: 'assets/[name].[ext]',
 				},
+				external: [/\/__tests__\//, /\.test\.js$/, /\.spec\.js$/],
 			},
 		},
 		plugins: [
