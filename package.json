@@ -13,7 +13,8 @@
 		"unzip:prod": "node scripts/unzipProd.js",
 		"test": "jest",
 		"test:watch": "jest --watch",
-		"test:coverage": "jest --coverage"
+		"test:coverage": "jest --coverage",
+		"copy-files": "node copy-source-files.js"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.2",
@@ -22,6 +23,7 @@
 		"adm-zip": "^0.5.16",
 		"archiver": "^7.0.1",
 		"babel-jest": "^29.5.0",
+		"cpx2": "^7.0.1",
 		"cross-env": "^7.0.3",
 		"dotenv": "^16.4.5",
 		"fs-extra": "^10.0.0",
