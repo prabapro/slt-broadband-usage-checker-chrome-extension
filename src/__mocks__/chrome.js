@@ -3,21 +3,15 @@
 export const chrome = {
 	storage: {
 		local: {
-			get: jest.fn(),
-			set: jest.fn(),
+			get: jest.fn((keys, callback) => setTimeout(() => callback({}), 0)),
+			set: jest.fn((data, callback) => setTimeout(callback, 0)),
 		},
 		session: {
-			get: jest.fn(),
-			set: jest.fn(),
+			get: jest.fn((key, callback) => setTimeout(() => callback({}), 0)),
+			set: jest.fn((data, callback) => setTimeout(callback, 0)),
 		},
 	},
 	runtime: {
-		sendMessage: jest.fn(),
-		onMessage: {
-			addListener: jest.fn(),
-		},
-	},
-	tabs: {
-		create: jest.fn(),
+		lastError: null,
 	},
 };
