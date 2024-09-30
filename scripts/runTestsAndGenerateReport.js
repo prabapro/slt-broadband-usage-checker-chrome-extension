@@ -17,6 +17,9 @@ try {
 	const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 	const version = packageJson.version;
 
+	// Format the date
+	const formattedDate = new Date().toUTCString().replace(/GMT/, 'UTC');
+
 	// Generate HTML content
 	let htmlContent = `
 <!DOCTYPE html>
@@ -43,6 +46,9 @@ try {
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
         }
         h2 {
             color: #34495e;
@@ -55,7 +61,7 @@ try {
         }
         .highlight {
             background-color: #dbccfa3b;
-            padding: 8px 15px;
+            padding: 4px 10px;
             border-radius: 25px;
             font-family: 'Roboto Mono', monospace;
             color: #d63384;
@@ -104,11 +110,43 @@ try {
             font-size: 1.2em;
             font-weight: 600;
         }
+        .toc {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin-bottom: 10px;
+        }
+        .toc a {
+            color: #d63384;
+            text-decoration: none;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .date {
+            font-size: 0.4em;
+            color: #7f8c8d;
+            font-weight: 400;
+            font-family: 'Roboto Mono', monospace;
+            color: #485051;
+        }
     </style>
 </head>
 <body>
-    <h1>Test Results for v${version}</h1>
-    <p>Date: ${new Date().toLocaleString()}</p>
+    <h1>
+        Test Results for v${version}
+        <span class="date">${formattedDate}</span>
+    </h1>
     <div class="summary">
         <div class="summary-item">
             <div class="summary-label">Total Tests</div>
@@ -123,12 +161,26 @@ try {
             <div class="summary-value fail">${results.numFailedTests}</div>
         </div>
     </div>
-    <h2>Test Details</h2>
+    <div class="toc">
+        <h3>Files Tested:</h3>
+        <ul>
 `;
 
-	results.testResults.forEach((testFile) => {
+	// Generate table of contents
+	results.testResults.forEach((testFile, index) => {
 		const relativePath = path.relative(process.cwd(), testFile.name);
-		htmlContent += `<div class="test-file"><h3><span class="highlight">${relativePath}</span></h3>`;
+		const fileNumber = (index + 1).toString().padStart(2, '0');
+		htmlContent += `            <li><a href="#file-${index}">${fileNumber} ${relativePath}</a></li>\n`;
+	});
+
+	htmlContent += `        </ul>
+    </div>
+`;
+
+	results.testResults.forEach((testFile, index) => {
+		const relativePath = path.relative(process.cwd(), testFile.name);
+		const fileNumber = (index + 1).toString().padStart(2, '0');
+		htmlContent += `<div id="file-${index}" class="test-file"><h3>${fileNumber} <span class="highlight">${relativePath}</span></h3>`;
 
 		let currentDescribe = '';
 		testFile.assertionResults.forEach((test) => {
