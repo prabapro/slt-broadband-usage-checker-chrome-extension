@@ -297,4 +297,55 @@ describe('Helper Functions', () => {
 			expect(getFillClass(110)).toBe('fill-exceeded');
 		});
 	});
+
+	describe('navigateToExtraGBGroup - Additional Tests', () => {
+		it('should call goToPage with correct index when Extra GB group exists', () => {
+			document.body.innerHTML = `
+			<div class="data-group" data-group-name="Main Pack"></div>
+			<div class="data-group" data-group-name="Extra GB"></div>
+			<div class="data-group" data-group-name="Bonus Data"></div>
+		  `;
+			const goToPageMock = jest.fn();
+
+			navigateToExtraGBGroup(goToPageMock);
+
+			expect(goToPageMock).toHaveBeenCalledWith(1);
+		});
+
+		it('should not call goToPage when Extra GB group does not exist', () => {
+			document.body.innerHTML = `
+			<div class="data-group" data-group-name="Main Pack"></div>
+			<div class="data-group" data-group-name="Bonus Data"></div>
+		  `;
+			const goToPageMock = jest.fn();
+
+			navigateToExtraGBGroup(goToPageMock);
+
+			expect(goToPageMock).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('getFillClass - Additional Tests', () => {
+		it('should return fill-low for percentage less than 25', () => {
+			expect(getFillClass(24)).toBe('fill-low');
+		});
+
+		it('should return fill-medium for percentage between 25 and 50', () => {
+			expect(getFillClass(40)).toBe('fill-medium');
+		});
+
+		it('should return fill-high for percentage between 50 and 75', () => {
+			expect(getFillClass(74)).toBe('fill-high');
+		});
+
+		it('should return fill-very-high for percentage 75 or greater, but less than 100', () => {
+			expect(getFillClass(75)).toBe('fill-very-high');
+			expect(getFillClass(99)).toBe('fill-very-high');
+		});
+
+		it('should return fill-exceeded for percentage 100 or greater', () => {
+			expect(getFillClass(100)).toBe('fill-exceeded');
+			expect(getFillClass(110)).toBe('fill-exceeded');
+		});
+	});
 });
