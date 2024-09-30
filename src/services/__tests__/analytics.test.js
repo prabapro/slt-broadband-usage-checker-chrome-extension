@@ -180,4 +180,53 @@ describe('Analytics Service', () => {
 			);
 		});
 	});
+
+	describe('sendPageView - Additional Tests', () => {
+		it('should handle network errors gracefully', async () => {
+			global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+			console.error = jest.fn(); // Mock console.error
+
+			await sendPageView('Test Page', 'https://test.com');
+
+			expect(console.error).toHaveBeenCalledWith(
+				'Error sending page view to GA4:',
+				expect.any(Error)
+			);
+		});
+
+		it('should handle non-OK responses', async () => {
+			global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 400 });
+			console.error = jest.fn(); // Mock console.error
+
+			await sendPageView('Test Page', 'https://test.com');
+
+			expect(console.error).toHaveBeenCalledWith(
+				'Error sending page view to GA4:',
+				expect.any(Error)
+			);
+		});
+	});
+
+	describe('sendEvent - Additional Tests', () => {
+		it('should include engagement time in the payload', async () => {
+			global.fetch = jest.fn().mockResolvedValue({ ok: true });
+
+			await sendEvent('test_event', { custom_param: 'value' });
+
+			const payload = JSON.parse(fetch.mock.calls[0][1].body);
+			expect(payload.events[0].params).toHaveProperty('engagement_time_msec');
+		});
+
+		it('should handle events with no additional params', async () => {
+			global.fetch = jest.fn().mockResolvedValue({ ok: true });
+
+			await sendEvent('test_event');
+
+			const payload = JSON.parse(fetch.mock.calls[0][1].body);
+			expect(payload.events[0].name).toBe('test_event');
+			expect(Object.keys(payload.events[0].params)).not.toContain(
+				'custom_param'
+			);
+		});
+	});
 });
