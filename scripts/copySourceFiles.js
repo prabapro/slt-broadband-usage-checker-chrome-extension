@@ -1,12 +1,9 @@
 // scripts/copySourceFiles.js
-
-import cpx from 'cpx2';
 import path from 'path';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 import Table from 'cli-table3';
 
-const source = '**/*';
 const destination = '__copied_files__';
 
 const fileTypeNames = {
@@ -21,78 +18,121 @@ const fileTypeNames = {
 	'.jpeg': 'Images',
 	'.gif': 'Images',
 	'.svg': 'Vector Graphics',
+	'.yml': 'Configuration',
+	'.tml': 'Configuration',
 	'': 'Other',
 };
 
 async function readProjectConfig() {
 	const configPath = path.join(process.cwd(), 'project-config.json');
 	const configFile = await fs.readFile(configPath, 'utf8');
-	return JSON.parse(configFile).ignore;
+	return JSON.parse(configFile);
+}
+
+async function shouldInclude(filePath, config) {
+	const relativePath = path.relative(process.cwd(), filePath);
+	const fileName = path.basename(filePath);
+	const isDirectory = await fs
+		.stat(filePath)
+		.then((stat) => stat.isDirectory());
+
+	// Always exclude node_modules
+	if (relativePath.startsWith('node_modules')) {
+		return false;
+	}
+
+	// Check if the file or directory is explicitly allowed
+	if (isDirectory && config.allow.directories.includes(fileName)) {
+		return true;
+	}
+	if (!isDirectory && config.allow.files.includes(fileName)) {
+		return true;
+	}
+
+	// Check system ignores
+	if (
+		config.ignore.system.includes(fileName) ||
+		(fileName.startsWith('.') &&
+			!config.allow.directories.includes(fileName)) ||
+		fileName.endsWith('~')
+	) {
+		return false;
+	}
+
+	// Check directories
+	if (
+		isDirectory &&
+		config.ignore.directories.some((dir) => relativePath.startsWith(dir))
+	) {
+		return false;
+	}
+
+	// Check files
+	if (
+		!isDirectory &&
+		config.ignore.files.some((pattern) => {
+			if (pattern.startsWith('*')) {
+				return fileName.endsWith(pattern.slice(1));
+			}
+			return fileName === pattern;
+		})
+	) {
+		return false;
+	}
+
+	return true;
 }
 
 async function copySourceFiles() {
 	try {
-		const ignoreConfig = await readProjectConfig();
+		const config = await readProjectConfig();
 
-		cpx.copy(
-			source,
-			destination,
-			{
-				clean: true,
-				includeEmptyDirs: false,
-				ignore: [
-					...ignoreConfig.directories.map((dir) => `${dir}/**/*`),
-					...ignoreConfig.files,
-					...ignoreConfig.system,
-				],
-			},
-			async (err) => {
-				if (err) {
-					console.error('Error during copying:', err);
-					return;
+		// Ensure destination directory is empty
+		await fs.emptyDir(destination);
+
+		const copyPromises = [];
+		const copiedFiles = new Set();
+
+		const walkDir = async (currentPath) => {
+			const entries = await fs.readdir(currentPath, { withFileTypes: true });
+			for (const entry of entries) {
+				const srcPath = path.join(currentPath, entry.name);
+
+				if (await shouldInclude(srcPath, config)) {
+					if (entry.isDirectory()) {
+						await walkDir(srcPath);
+					} else {
+						const fileName = entry.name;
+						let destPath = path.join(destination, fileName);
+						let counter = 1;
+
+						// Handle duplicate file names
+						while (copiedFiles.has(destPath)) {
+							const parsedPath = path.parse(fileName);
+							destPath = path.join(
+								destination,
+								`${parsedPath.name}_${counter}${parsedPath.ext}`
+							);
+							counter++;
+						}
+
+						copyPromises.push(fs.copy(srcPath, destPath));
+						copiedFiles.add(destPath);
+					}
 				}
-
-				await flattenDirectory(destination);
-				const copiedFiles = await getUniqueFiles(destination);
-				const groupedFiles = groupFilesByType(copiedFiles);
-				printSummary(groupedFiles);
 			}
+		};
+
+		await walkDir(process.cwd());
+		await Promise.all(copyPromises);
+
+		const groupedFiles = groupFilesByType(
+			Array.from(copiedFiles).map((file) => path.basename(file))
 		);
+		printSummary(groupedFiles);
 	} catch (err) {
 		console.error('Error:', err);
 	}
-}
-
-async function flattenDirectory(directory) {
-	const items = await fs.readdir(directory, { withFileTypes: true });
-
-	for (const item of items) {
-		const fullPath = path.join(directory, item.name);
-
-		if (item.isDirectory()) {
-			await flattenDirectory(fullPath);
-
-			const innerItems = await fs.readdir(fullPath);
-
-			for (const innerItem of innerItems) {
-				const innerPath = path.join(fullPath, innerItem);
-				const destPath = path.join(directory, innerItem);
-
-				if ((await fs.stat(innerPath)).isFile()) {
-					await fs.move(innerPath, destPath, { overwrite: true });
-				}
-			}
-
-			await fs.rmdir(fullPath);
-		}
-	}
-}
-
-async function getUniqueFiles(directory) {
-	const files = await fs.readdir(directory);
-	return files.filter((file) =>
-		fs.statSync(path.join(directory, file)).isFile()
-	);
 }
 
 function groupFilesByType(files) {

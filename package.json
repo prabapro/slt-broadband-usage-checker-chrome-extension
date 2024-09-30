@@ -27,7 +27,6 @@
 		"adm-zip": "^0.5.16",
 		"archiver": "^7.0.1",
 		"babel-jest": "^29.5.0",
-		"cpx2": "^7.0.1",
 		"cross-env": "^7.0.3",
 		"dotenv": "^16.4.5",
 		"fs-extra": "^10.0.0",
