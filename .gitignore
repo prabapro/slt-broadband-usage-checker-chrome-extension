@@ -36,6 +36,7 @@ dist_zip
 *.local
 !public
 /__copied_files__
+tree.txt
 
 # Test coverage
 coverage
