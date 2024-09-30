@@ -19,5 +19,9 @@
 			"tree.txt"
 		],
 		"system": [".git", ".gitignore", ".DS_Store", "Thumbs.db", ".env", ".env.*"]
+	},
+	"allow": {
+		"directories": [".github", ".netlify"],
+		"files": []
 	}
 }

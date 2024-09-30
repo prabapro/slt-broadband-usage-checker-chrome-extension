@@ -6,35 +6,42 @@ import path from 'path';
 async function readProjectConfig() {
 	const configPath = path.join(process.cwd(), 'project-config.json');
 	const configFile = await fs.readFile(configPath, 'utf8');
-	return JSON.parse(configFile).ignore;
+	return JSON.parse(configFile);
 }
 
-async function shouldIgnore(filePath, ignoreConfig) {
+async function shouldIgnore(filePath, config) {
 	const fileName = path.basename(filePath);
 	const stats = await fs.stat(filePath);
 	const isDirectory = stats.isDirectory();
 
-	// Check system ignores
+	// Check if the file or directory is explicitly allowed
+	if (isDirectory && config.allow.directories.includes(fileName)) {
+		return false;
+	}
+	if (!isDirectory && config.allow.files.includes(fileName)) {
+		return false;
+	}
+
+	// Existing ignore checks
 	if (
-		ignoreConfig.system.includes(fileName) ||
-		fileName.startsWith('.') ||
+		config.ignore.system.includes(fileName) ||
+		(fileName.startsWith('.') &&
+			!config.allow.directories.includes(fileName)) ||
 		fileName.endsWith('~')
 	) {
 		return true;
 	}
 
-	// Check directories
 	if (
 		isDirectory &&
-		ignoreConfig.directories.some((dir) => filePath.startsWith(dir))
+		config.ignore.directories.some((dir) => filePath.startsWith(dir))
 	) {
 		return true;
 	}
 
-	// Check files
 	if (
 		!isDirectory &&
-		ignoreConfig.files.some((pattern) => {
+		config.ignore.files.some((pattern) => {
 			if (pattern.startsWith('*')) {
 				return fileName.endsWith(pattern.slice(1));
 			}
@@ -47,7 +54,7 @@ async function shouldIgnore(filePath, ignoreConfig) {
 	return false;
 }
 
-async function generateTreeStructure(dir, prefix = '', ignoreConfig) {
+async function generateTreeStructure(dir, prefix = '', config) {
 	let output = '';
 	const entries = await fs.readdir(dir, { withFileTypes: true });
 
@@ -57,14 +64,14 @@ async function generateTreeStructure(dir, prefix = '', ignoreConfig) {
 		const entryPath = path.join(dir, entry.name);
 		const relativePath = path.relative(process.cwd(), entryPath);
 
-		if (await shouldIgnore(relativePath, ignoreConfig)) continue;
+		if (await shouldIgnore(relativePath, config)) continue;
 
 		const connector = isLast ? '└── ' : '├── ';
 		output += prefix + connector + entry.name + '\n';
 
 		if (entry.isDirectory()) {
 			const newPrefix = prefix + (isLast ? '    ' : '│   ');
-			output += await generateTreeStructure(entryPath, newPrefix, ignoreConfig);
+			output += await generateTreeStructure(entryPath, newPrefix, config);
 		}
 	}
 
@@ -73,14 +80,10 @@ async function generateTreeStructure(dir, prefix = '', ignoreConfig) {
 
 async function generateTree() {
 	try {
-		const ignoreConfig = await readProjectConfig();
-		console.log('Ignore configuration:', ignoreConfig);
+		const config = await readProjectConfig();
+		console.log('Configuration:', config);
 
-		const treeOutput = await generateTreeStructure(
-			process.cwd(),
-			'',
-			ignoreConfig
-		);
+		const treeOutput = await generateTreeStructure(process.cwd(), '', config);
 
 		await fs.writeFile('tree.txt', treeOutput);
 		console.log('Tree structure has been saved to tree.txt');
