@@ -16,6 +16,7 @@
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
+		"test-result": "node scripts/runTestsAndGenerateReport.js",
 		"copy-files": "npm run clean:copied-files && node scripts/copySourceFiles.js",
 		"generate-tree": "node scripts/generateTree.js"
 	},

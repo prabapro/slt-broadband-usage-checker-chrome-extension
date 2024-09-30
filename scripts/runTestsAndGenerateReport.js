@@ -25,29 +25,110 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Results for v${version}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
-        h1 { color: #333; }
-        h2 { color: #666; }
-        .pass { color: green; }
-        .fail { color: red; }
-        .test-file { margin-bottom: 20px; }
-        .test-suite { margin-left: 20px; }
-        .test-case { margin-left: 40px; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1, h2, h3, h4 {
+            font-weight: 600;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+        }
+        .pass {
+            color: #27ae60;
+        }
+        .fail {
+            color: #e74c3c;
+        }
+        .highlight {
+            background-color: #dbccfa3b;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-family: 'Roboto Mono', monospace;
+            color: #d63384;
+            font-size: 1rem;
+        }
+        .test-file {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .test-suite {
+            margin-left: 20px;
+            border-left: 3px solid #3498db;
+            padding-left: 15px;
+        }
+        .test-case {
+            font-family: 'Roboto Mono', monospace;
+            margin-left: 40px;
+            padding: 5px 0;
+        }
+        .error {
+            background-color: #ffeaea;
+            border-left: 3px solid #e74c3c;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .summary-item {
+            text-align: center;
+        }
+        .summary-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        .summary-value {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <h1>Test Results for v${version}</h1>
-    <p>Date: ${new Date().toISOString()}</p>
-    <p>Total Tests: ${results.numTotalTests}</p>
-    <p>Passed: ${results.numPassedTests}</p>
-    <p>Failed: ${results.numFailedTests}</p>
+    <p>Date: ${new Date().toLocaleString()}</p>
+    <div class="summary">
+        <div class="summary-item">
+            <div class="summary-label">Total Tests</div>
+            <div class="summary-value">${results.numTotalTests}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Passed</div>
+            <div class="summary-value pass">${results.numPassedTests}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Failed</div>
+            <div class="summary-value fail">${results.numFailedTests}</div>
+        </div>
+    </div>
     <h2>Test Details</h2>
 `;
 
 	results.testResults.forEach((testFile) => {
 		const relativePath = path.relative(process.cwd(), testFile.name);
-		htmlContent += `<div class="test-file"><h3>${relativePath}</h3>`;
+		htmlContent += `<div class="test-file"><h3><span class="highlight">${relativePath}</span></h3>`;
 
 		let currentDescribe = '';
 		testFile.assertionResults.forEach((test) => {
