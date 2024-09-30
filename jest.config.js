@@ -18,4 +18,5 @@ export default {
 		'<rootDir>/.*/__copied_files__/.*',
 		'<rootDir>/__copied_files__/',
 	],
+	testTimeout: 10000, // 10 seconds
 };

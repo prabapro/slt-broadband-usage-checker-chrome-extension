@@ -3,14 +3,14 @@
 const GA4_MEASUREMENT_ID = __GA4_MEASUREMENT_ID__;
 const GA4_API_SECRET = __GA4_API_SECRET__;
 const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
-const SESSION_EXPIRATION_IN_MIN = 30;
 const DEFAULT_ENGAGEMENT_TIME_IN_MSEC = 100;
+export let SESSION_EXPIRATION_IN_MIN = 30;
 
 // The display version will be injected by Vite
 const DISPLAY_VERSION = __APP_VERSION__;
 
 // Generate a unique client ID for each extension installation
-const generateUUID =
+export const generateUUID =
 	process.env.NODE_ENV === 'test'
 		? () => 'mocked-uuid'
 		: () =>
@@ -20,47 +20,64 @@ const generateUUID =
 					return v.toString(16);
 				});
 
-export function getOrCreateClientId() {
-	return new Promise((resolve) => {
+export async function getOrCreateClientId() {
+	return new Promise((resolve, reject) => {
 		chrome.storage.local.get(['clientId'], (result) => {
+			if (chrome.runtime.lastError) {
+				reject(new Error(chrome.runtime.lastError.message));
+				return;
+			}
 			if (result.clientId) {
 				resolve(result.clientId);
 			} else {
 				const newClientId = generateUUID();
 				chrome.storage.local.set({ clientId: newClientId }, () => {
-					resolve(newClientId);
+					if (chrome.runtime.lastError) {
+						reject(new Error(chrome.runtime.lastError.message));
+					} else {
+						resolve(newClientId);
+					}
 				});
 			}
 		});
 	});
 }
 
+export function setSessionExpirationTime(minutes) {
+	SESSION_EXPIRATION_IN_MIN = minutes;
+}
+
 // Get or create a session ID
 export async function getOrCreateSessionId() {
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		chrome.storage.session.get('sessionData', (result) => {
+			if (chrome.runtime.lastError) {
+				reject(new Error(chrome.runtime.lastError.message));
+				return;
+			}
 			const currentTimeInMs = Date.now();
 			let sessionData = result.sessionData;
 
-			if (sessionData && sessionData.timestamp) {
+			const createNewSession = () => ({
+				session_id: currentTimeInMs.toString(),
+				timestamp: currentTimeInMs,
+			});
+
+			if (!sessionData || !sessionData.timestamp) {
+				sessionData = createNewSession();
+			} else {
 				const durationInMin = (currentTimeInMs - sessionData.timestamp) / 60000;
 				if (durationInMin > SESSION_EXPIRATION_IN_MIN) {
-					sessionData = null;
-				} else {
-					// Update the timestamp for existing sessions
-					sessionData.timestamp = currentTimeInMs;
+					sessionData = createNewSession();
 				}
 			}
 
-			if (!sessionData) {
-				sessionData = {
-					session_id: currentTimeInMs.toString(),
-					timestamp: currentTimeInMs,
-				};
-			}
-
 			chrome.storage.session.set({ sessionData }, () => {
-				resolve(sessionData.session_id);
+				if (chrome.runtime.lastError) {
+					reject(new Error(chrome.runtime.lastError.message));
+				} else {
+					resolve(sessionData.session_id);
+				}
 			});
 		});
 	});
