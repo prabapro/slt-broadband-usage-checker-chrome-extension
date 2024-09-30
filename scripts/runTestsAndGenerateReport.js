@@ -84,6 +84,12 @@ try {
             margin-left: 40px;
             padding: 5px 0;
         }
+        .time-taken {
+            font-size: 0.7em;
+            color: #7f8c8d;
+            vertical-align: super;
+            margin-left: 5px;
+        }
         .error {
             background-color: #ffeaea;
             border-left: 3px solid #e74c3c;
@@ -198,10 +204,10 @@ try {
 
 			const status = test.status === 'passed' ? 'pass' : 'fail';
 			htmlContent += `<div class="test-case ${status}">
-        ${test.status === 'passed' ? '✓' : '✗'} ${test.title} (${
-				test.duration
-			}ms)
-      </div>`;
+    ${test.status === 'passed' ? '✓' : '✗'} ${
+				test.title
+			}<span class="time-taken">(${test.duration}ms)</span>
+  </div>`;
 
 			if (test.status === 'failed') {
 				htmlContent += `<div class="error">Error: ${test.failureMessages.join(
