@@ -348,4 +348,193 @@ describe('Helper Functions', () => {
 			expect(getFillClass(110)).toBe('fill-exceeded');
 		});
 	});
+
+	// New test cases
+
+	describe('createProgressBar', () => {
+		it('should create a progress bar element with correct structure', () => {
+			const testData = {
+				name: 'Test Package',
+				used: '50',
+				limit: '100',
+				volume_unit: 'GB',
+				expiry_date: '30-Sep',
+			};
+			const progressBar = createProgressBar(testData);
+
+			expect(progressBar).toBeInstanceOf(HTMLElement);
+			expect(progressBar.className).toBe('progress-bar');
+			expect(progressBar.querySelector('h3').textContent).toBe('Test Package');
+			expect(progressBar.querySelector('.bar')).not.toBeNull();
+			expect(progressBar.querySelector('.fill')).not.toBeNull();
+			expect(progressBar.querySelectorAll('.progress-info span').length).toBe(
+				2
+			);
+		});
+
+		it('should handle zero usage correctly', () => {
+			const testData = {
+				name: 'Zero Usage',
+				used: '0',
+				limit: '100',
+				volume_unit: 'GB',
+				expiry_date: '30-Sep',
+			};
+			const progressBar = createProgressBar(testData);
+
+			expect(progressBar.querySelector('.fill').style.width).toBe('0%');
+			expect(progressBar.querySelector('.status').textContent).toContain(
+				'100.00 GB (100.0%) remaining'
+			);
+		});
+
+		it('should handle usage equal to limit', () => {
+			const testData = {
+				name: 'Full Usage',
+				used: '100',
+				limit: '100',
+				volume_unit: 'GB',
+				expiry_date: '30-Sep',
+			};
+			const progressBar = createProgressBar(testData);
+
+			expect(progressBar.querySelector('.fill').style.width).toBe('100%');
+			expect(progressBar.querySelector('.status').textContent.trim()).toBe(
+				'Quota fully used'
+			);
+		});
+
+		it('should handle exceeded quota', () => {
+			const testData = {
+				name: 'Exceeded Quota',
+				used: '110',
+				limit: '100',
+				volume_unit: 'GB',
+				expiry_date: '30-Sep',
+			};
+			const progressBar = createProgressBar(testData);
+
+			expect(progressBar.querySelector('.fill').classList).toContain(
+				'fill-exceeded'
+			);
+			expect(progressBar.querySelector('.status').classList).toContain(
+				'exceeded'
+			);
+			expect(progressBar.querySelector('.status').textContent.trim()).toBe(
+				'Quota exceeded'
+			);
+		});
+	});
+
+	describe('getFillClass', () => {
+		it('should return correct class for various percentage ranges', () => {
+			expect(getFillClass(0)).toBe('fill-low');
+			expect(getFillClass(24)).toBe('fill-low');
+			expect(getFillClass(25)).toBe('fill-medium');
+			expect(getFillClass(49)).toBe('fill-medium');
+			expect(getFillClass(50)).toBe('fill-high');
+			expect(getFillClass(74)).toBe('fill-high');
+			expect(getFillClass(75)).toBe('fill-very-high');
+			expect(getFillClass(99)).toBe('fill-very-high');
+			expect(getFillClass(100)).toBe('fill-exceeded');
+			expect(getFillClass(150)).toBe('fill-exceeded');
+		});
+	});
+
+	describe('navigateToExtraGBGroup', () => {
+		beforeEach(() => {
+			document.body.innerHTML = `
+			<div class="data-group" data-group-name="Main Pack"></div>
+			<div class="data-group" data-group-name="Extra GB"></div>
+			<div class="data-group" data-group-name="Bonus Data"></div>
+		  `;
+		});
+
+		it('should call goToPage with correct index when Extra GB group exists', () => {
+			const goToPageMock = jest.fn();
+			navigateToExtraGBGroup(goToPageMock);
+			expect(goToPageMock).toHaveBeenCalledWith(1);
+		});
+
+		it('should not call goToPage when Extra GB group does not exist', () => {
+			document.body.innerHTML = `
+			<div class="data-group" data-group-name="Main Pack"></div>
+			<div class="data-group" data-group-name="Bonus Data"></div>
+		  `;
+			const goToPageMock = jest.fn();
+			navigateToExtraGBGroup(goToPageMock);
+			expect(goToPageMock).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('createDataGroup', () => {
+		it('should create a data group element with correct structure', () => {
+			const serviceName = 'Test Service';
+			const items = [
+				{
+					name: 'Item 1',
+					used: '10',
+					limit: '100',
+					volume_unit: 'GB',
+					expiry_date: '30-Sep',
+				},
+				{
+					name: 'Item 2',
+					used: '20',
+					limit: '50',
+					volume_unit: 'GB',
+					expiry_date: '30-Sep',
+				},
+			];
+			const group = createDataGroup(serviceName, items);
+
+			expect(group).toBeInstanceOf(HTMLElement);
+			expect(group.className).toBe('data-group');
+			expect(group.querySelector('h2').textContent).toBe(serviceName);
+			expect(group.querySelectorAll('.progress-bar').length).toBe(items.length);
+		});
+	});
+
+	describe('formatSpeedStatus edge cases', () => {
+		it('should handle unknown status', () => {
+			expect(formatSpeedStatus('UNKNOWN')).toEqual({
+				text: 'Unknown',
+				hasClickable: false,
+			});
+		});
+
+		it('should handle empty status', () => {
+			expect(formatSpeedStatus('')).toEqual({
+				text: '',
+				hasClickable: false,
+			});
+		});
+	});
+
+	describe('getStatusClass edge cases', () => {
+		it('should return status-other for unknown status', () => {
+			expect(getStatusClass('UNKNOWN')).toBe('status-other');
+		});
+
+		it('should return status-other for empty status', () => {
+			expect(getStatusClass('')).toBe('status-other');
+		});
+	});
+
+	describe('checkExtraGB edge cases', () => {
+		it('should handle empty usage_data array', () => {
+			const testData = { usage_data: [] };
+			expect(checkExtraGB(testData)).toBe(false);
+		});
+
+		it('should handle null usage_data', () => {
+			const testData = { usage_data: null };
+			expect(checkExtraGB(testData)).toBe(false);
+		});
+
+		it('should handle undefined usage_data', () => {
+			const testData = {};
+			expect(checkExtraGB(testData)).toBe(false);
+		});
+	});
 });
