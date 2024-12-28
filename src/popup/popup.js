@@ -23,7 +23,11 @@ if (USE_MOCK_DATA) {
 
 const MINUTES_IN_MS = 60 * 1000; // 1 minute in milliseconds
 const CACHE_DURATION = 15 * MINUTES_IN_MS; // 5 minutes in milliseconds
-const BASE_URL = 'https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS';
+
+// SLT has changed the end point URL for the API during the month of December 2024
+// OLR URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS
+
+const BASE_URL = 'https://omniscapp.slt.lk/slt/ext/api/BBVAS';
 const SUPPORT_URL =
 	'https://chromewebstore.google.com/detail/slt-broadband-usage-check/cdmfcngnfgnhddcheambbdjdjmelnoep/support';
 const REVIEW_URL =

@@ -5,7 +5,8 @@
 #### Request
 
 ```
-https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/UsageSummary?subscriberID=94112******
+OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/UsageSummary?subscriberID=94112******
+NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/UsageSummary?subscriberID=94112******
 ```
 
 #### Response
@@ -122,7 +123,8 @@ https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/UsageSummary?subscriberID=9411
 #### Request
 
 ```
-https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/ExtraGB?subscriberID=94112******
+OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/ExtraGB?subscriberID=94112******
+NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/ExtraGB?subscriberID=94112******
 ```
 
 #### Response
@@ -183,7 +185,8 @@ https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/ExtraGB?subscriberID=94112****
 #### Request
 
 ```
-https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/BonusData?subscriberID=94112******
+OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/BonusData?subscriberID=94112******
+NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/BonusData?subscriberID=94112******
 ```
 
 #### Response
@@ -224,7 +227,8 @@ https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/BonusData?subscriberID=94112**
 #### Request
 
 ```
-https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/GetDashboardVASBundles?subscriberID=94112******
+OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/GetDashboardVASBundles?subscriberID=94112******
+NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/GetDashboardVASBundles?subscriberID=94112******
 ```
 
 #### Response
@@ -264,7 +268,8 @@ https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/GetDashboardVASBundles?subscri
 #### Request
 
 ```
-https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/FreeData?subscriberID=94112******
+OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/FreeData?subscriberID=94112******
+NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/FreeData?subscriberID=94112******
 ```
 
 #### Response
