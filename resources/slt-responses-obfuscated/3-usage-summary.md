@@ -4,7 +4,7 @@
 
 #### Request
 
-```
+```sh
 OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/UsageSummary?subscriberID=94112******
 NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/UsageSummary?subscriberID=94112******
 ```
@@ -13,7 +13,7 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/UsageSummary?subscriberID=94
 
 ##### When within the quota (Speed: Normal)
 
-```
+```json
 {
 	"isSuccess": true,
 	"errorMessege": null,
@@ -66,7 +66,7 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/UsageSummary?subscriberID=94
 
 ##### When quota is exceeded (Speed: Throttled)
 
-```
+```json
 {
 	"isSuccess": true,
 	"errorMessege": null,
@@ -115,14 +115,62 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/UsageSummary?subscriberID=94
 	"errorShow": null,
 	"errorCode": null
 }
+```
 
+##### Volume Based Unlimited Plans (Unlimited Family | Boost | Blast | Turbo)
+
+```json
+{
+	"isSuccess": true,
+	"errorMessege": null,
+	"exceptionDetail": null,
+	"dataBundle": {
+		"status": "NORMAL",
+		"reported_time": "01-Feb-2025 07:11 AM",
+		"my_package_summary": { "limit": null, "used": "0.0", "volume_unit": "GB" },
+		"bonus_data_summary": {
+			"limit": "6.0",
+			"used": "2.9",
+			"volume_unit": "GB"
+		},
+		"free_data_summary": null,
+		"vas_data_summary": {
+			"limit": "100.0",
+			"used": "23.1",
+			"volume_unit": "GB"
+		},
+		"extra_gb_data_summary": null,
+		"my_package_info": {
+			"package_name": "UNLIMITED BOOST",
+			"package_summary": null,
+			"usageDetails": [
+				{
+					"name": "Total Usage",
+					"limit": null,
+					"remaining": null,
+					"used": "0.0",
+					"percentage": 0,
+					"volume_unit": "GB",
+					"expiry_date": "28-Feb",
+					"claim": null,
+					"unsubscribable": false,
+					"timestamp": 0,
+					"subscriptionid": null
+				}
+			],
+			"reported_time": "01-Feb-2025 07:11 AM"
+		}
+	},
+	"errorShow": null,
+	"errorCode": null
+}
 ```
 
 ## 2. Extra GB
 
 #### Request
 
-```
+```sh
 OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/ExtraGB?subscriberID=94112******
 NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/ExtraGB?subscriberID=94112******
 ```
@@ -131,7 +179,7 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/ExtraGB?subscriberID=94112**
 
 ##### When no Extra GB obtained
 
-```
+```json
 {
 	"isSuccess": true,
 	"errorMessege": null,
@@ -149,7 +197,7 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/ExtraGB?subscriberID=94112**
 
 ##### When Extra GB is obtained
 
-```
+```json
 {
 	"isSuccess": true,
 	"errorMessege": null,
@@ -177,21 +225,20 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/ExtraGB?subscriberID=94112**
 	"errorShow": null,
 	"errorCode": null
 }
-
 ```
 
 ## 3. Bonus Data
 
 #### Request
 
-```
+```sh
 OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/BonusData?subscriberID=94112******
 NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/BonusData?subscriberID=94112******
 ```
 
 #### Response
 
-```
+```json
 {
 	"isSuccess": true,
 	"errorMessege": null,
@@ -219,21 +266,20 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/BonusData?subscriberID=94112
 	"errorShow": null,
 	"errorCode": null
 }
-
 ```
 
 ## 4. Add-Ons Data
 
 #### Request
 
-```
+```sh
 OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/GetDashboardVASBundles?subscriberID=94112******
 NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/GetDashboardVASBundles?subscriberID=94112******
 ```
 
 #### Response
 
-```
+```json
 {
 	"isSuccess": true,
 	"errorMessege": null,
@@ -267,14 +313,14 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/GetDashboardVASBundles?subsc
 
 #### Request
 
-```
+```sh
 OLD URL: https://omniscapp.slt.lk/mobitelint/slt/api/BBVAS/FreeData?subscriberID=94112******
 NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/FreeData?subscriberID=94112******
 ```
 
 #### Response
 
-```
+```json
 {
 	"isSuccess": true,
 	"errorMessege": null,
@@ -288,5 +334,4 @@ NEW URL: https://omniscapp.slt.lk/slt/ext/api/BBVAS/FreeData?subscriberID=94112*
 	"errorShow": null,
 	"errorCode": null
 }
-
 ```

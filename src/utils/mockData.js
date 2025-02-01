@@ -1,15 +1,16 @@
 // src/utils/mockData.js
 
 export const mockData = {
-	reported_time: '28-Sep-2024 04:54 PM',
+	package_name: 'UNLIMITED BOOST',
+	reported_time: '01-Feb-2025 07:59 AM',
 	speed_status: 'NORMAL', // NORMAL || THROTTLED
 	usage_data: [
 		{
 			claim: null,
-			expiry_date: '30-Sep',
+			expiry_date: '28-Feb',
 			fetched_from: '/UsageSummary',
-			limit: '440.0',
-			name: 'Standard',
+			limit: '440.0', // null
+			name: 'Standard', // 'Total Usage' for unlimited plans
 			percentage: 0,
 			remaining: '0',
 			service_name: 'Main Pack',
@@ -21,7 +22,7 @@ export const mockData = {
 		},
 		{
 			claim: null,
-			expiry_date: '30-Sep',
+			expiry_date: '28-Feb',
 			fetched_from: '/UsageSummary',
 			limit: '660.0',
 			name: 'Total (Standard + Free)',
@@ -36,7 +37,7 @@ export const mockData = {
 		},
 		{
 			claim: null,
-			expiry_date: '01-Oct',
+			expiry_date: '28-Feb',
 			fetched_from: '/BonusData',
 			limit: 6,
 			name: 'Loyalty',
@@ -51,7 +52,7 @@ export const mockData = {
 		},
 		{
 			claim: null,
-			expiry_date: '27-Nov',
+			expiry_date: '28-Feb',
 			fetched_from: '/ExtraGB',
 			limit: 50,
 			name: 'Extra GB - 50 GB',
@@ -66,7 +67,7 @@ export const mockData = {
 		},
 		{
 			claim: null,
-			expiry_date: '10-Oct',
+			expiry_date: '28-Feb',
 			fetched_from: '/GetDashboardVASBundles',
 			limit: 20,
 			name: '20 GB Add-on',
@@ -81,7 +82,7 @@ export const mockData = {
 		},
 		{
 			claim: null,
-			expiry_date: '10-Oct',
+			expiry_date: '28-Feb',
 			fetched_from: '/FreeData',
 			limit: 3,
 			name: '3GB Free Data',

@@ -107,10 +107,13 @@ const showWelcomeScreen = () => {
 
 	const welcomeScreen = document.createElement('div');
 	welcomeScreen.id = 'welcome-screen';
-	welcomeScreen.innerHTML = `
-        <h2>Hey 👋</h2>
-        <p>To get started, we need to fetch your session data from the MySLT Portal. Follow these steps:</p>
-        <div id="welcome-instructions">
+	welcomeScreen.innerHTML = /* HTML */ `
+		<h2>Hey 👋</h2>
+		<p>
+			To get started, we need to fetch your session data from the MySLT Portal.
+			Follow these steps:
+		</p>
+		<div id="welcome-instructions">
 			<ol>
 				<li>Click the button below to open the MySLT Portal in a new tab.</li>
 				<li>Log in to your account if needed.</li>
@@ -118,8 +121,8 @@ const showWelcomeScreen = () => {
 				<li>Click on this extension icon again to view your data usage.</li>
 			</ol>
 		</div>
-        <button id="welcome-login-btn">Open MySLT Portal</button>
-    `;
+		<button id="welcome-login-btn">Open MySLT Portal</button>
+	`;
 
 	document.body.insertBefore(welcomeScreen, document.querySelector('main'));
 
@@ -225,6 +228,7 @@ const fetchAllData = async (authToken, sltClientId, subscriberId) => {
 		const combinedData = {
 			reported_time: usageSummary.reported_time,
 			speed_status: usageSummary.speed_status,
+			package_name: usageSummary.package_name,
 			usage_data: [
 				...usageSummary.usage_data,
 				...extraGB,
@@ -558,6 +562,7 @@ const fetchUsageSummary = async (authToken, sltClientId, subscriberId) => {
 	return {
 		reported_time: data.dataBundle.reported_time,
 		speed_status: data.dataBundle.status,
+		package_name: data.dataBundle.my_package_info.package_name,
 		usage_data: data.dataBundle.my_package_info.usageDetails.map((item) => ({
 			...item,
 			service_name: 'Main Pack',
