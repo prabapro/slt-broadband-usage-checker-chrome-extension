@@ -284,7 +284,10 @@ const updateAccountInfo = (accountId, speedStatus, combinedData) => {
 
 	if (accountIdElement) {
 		const formattedId = formatAccountId(accountId);
-		accountIdElement.textContent = `Account: ${formattedId}`;
+		const packageName = combinedData.package_name || '';
+		accountIdElement.textContent = `${formattedId} ${
+			packageName ? `(${packageName})` : ''
+		}`;
 	}
 
 	if (speedStatusElement && speedStatus) {
