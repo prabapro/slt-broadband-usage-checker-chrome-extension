@@ -1,7 +1,7 @@
 // src/utils/mockData.js
 
 export const mockData = {
-	package_name: 'UNLIMITED BOOST',
+	package_name: 'Any Delight',
 	reported_time: '01-Feb-2025 07:59 AM',
 	speed_status: 'NORMAL', // NORMAL || THROTTLED
 	usage_data: [

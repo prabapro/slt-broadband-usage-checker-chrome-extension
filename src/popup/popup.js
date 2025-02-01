@@ -8,6 +8,10 @@ import {
 	checkExtraGB,
 	navigateToExtraGBGroup,
 } from '../utils/helpers.js';
+import {
+	processApiResponse,
+	processUnlimitedPackageData,
+} from '../utils/fetchDataUtils.js';
 
 const USE_MOCK_DATA = __USE_MOCK_DATA__;
 
@@ -559,16 +563,12 @@ const fetchUsageSummary = async (authToken, sltClientId, subscriberId) => {
 		sltClientId,
 		subscriberId
 	);
-	return {
-		reported_time: data.dataBundle.reported_time,
-		speed_status: data.dataBundle.status,
-		package_name: data.dataBundle.my_package_info.package_name,
-		usage_data: data.dataBundle.my_package_info.usageDetails.map((item) => ({
-			...item,
-			service_name: 'Main Pack',
-			fetched_from: '/UsageSummary',
-		})),
-	};
+
+	// Process the API response
+	const processedData = processApiResponse(data);
+
+	// Handle unlimited package data
+	return processUnlimitedPackageData(processedData);
 };
 
 const fetchExtraGB = async (authToken, sltClientId, subscriberId) => {
