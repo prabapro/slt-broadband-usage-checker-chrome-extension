@@ -170,9 +170,13 @@ const getStatusText = (
 	if (isExceeded) return 'Quota exceeded';
 	if (isFullyUsed) return 'Quota fully used';
 	const formattedExpiryDate = formatExpiryDate(expiryDate);
-	return `<strong>${remainingBalance} ${quotaUnit}</strong> <small class="remaining-amount">(${formatNumber(
-		remainingPercentage
-	)}%) remaining till ${formattedExpiryDate}</small>`;
+	return /* HTML */ `
+		<strong>${remainingBalance} ${quotaUnit}</strong>
+		<small class="remaining-amount">
+			(${formatNumber(remainingPercentage)}%) remaining till
+			${formattedExpiryDate}
+		</small>
+	`;
 };
 
 /**
@@ -220,32 +224,30 @@ export const createProgressBar = (data) => {
 
 	const progressBar = document.createElement('div');
 	progressBar.className = 'progress-bar';
-	progressBar.innerHTML = `
-        <h3>${name}</h3>
-        <div class="bar">
-            <div class="fill ${getFillClass(
-							usedPercentage
-						)}" style="width: ${Math.min(usedPercentage, 100)}%"></div>
-        </div>
-        <div class="progress-info">
-            <span class="usage-info">
-                ${formatNumber(usedAmount, 2)} ${quotaUnit} of ${formatNumber(
-		totalAmount,
-		2
-	)} ${quotaUnit} used
-            </span>
-            <span class="status ${isExceeded || isFullyUsed ? 'exceeded' : ''}">
-                ${getStatusText(
-									isExceeded,
-									isFullyUsed,
-									remainingPercentage,
-									remainingBalance,
-									quotaUnit,
-									expiryDate
-								).trim()}
-            </span>
-        </div>
-    `;
+	progressBar.innerHTML = /* HTML */ `
+		<h3>${name}</h3>
+		<div class="bar">
+			<div
+				class="fill ${getFillClass(usedPercentage)}"
+				style="width: ${Math.min(usedPercentage, 100)}%"></div>
+		</div>
+		<div class="progress-info">
+			<span class="usage-info">
+				${formatNumber(usedAmount, 2)} ${quotaUnit} of
+				${formatNumber(totalAmount, 2)} ${quotaUnit} used
+			</span>
+			<span class="status ${isExceeded || isFullyUsed ? 'exceeded' : ''}">
+				${getStatusText(
+					isExceeded,
+					isFullyUsed,
+					remainingPercentage,
+					remainingBalance,
+					quotaUnit,
+					expiryDate
+				).trim()}
+			</span>
+		</div>
+	`;
 
 	return progressBar;
 };
