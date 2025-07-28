@@ -180,6 +180,40 @@ const getStatusText = (
 };
 
 /**
+ * Creates an unlimited usage display element (no progress bar).
+ * @param {Object} data - The data for the unlimited usage display.
+ * @param {string} data.used - The amount used.
+ * @param {string} data.volume_unit - The unit of volume (e.g., "GB").
+ * @param {string} data.name - The name of the data package.
+ * @param {string} data.expiry_date - The expiry date of the package.
+ * @returns {HTMLElement} The created unlimited usage display element.
+ */
+export const createUnlimitedUsageDisplay = (data) => {
+	const { used, volume_unit: quotaUnit, name, expiry_date: expiryDate } = data;
+	const usedAmount = parseFloat(used);
+	const formattedExpiryDate = formatExpiryDate(expiryDate);
+
+	const unlimitedDisplay = document.createElement('div');
+	unlimitedDisplay.className = 'unlimited-usage-display';
+	unlimitedDisplay.innerHTML = /* HTML */ `
+		<h3>${name}</h3>
+		<div class="unlimited-usage-info">
+			<div class="usage-amount unlimited">
+				<span class="usage-number">${formatNumber(usedAmount, 2)}</span>
+				<span class="usage-unit">${quotaUnit}</span>
+				<span class="usage-label">used</span>
+			</div>
+			<div class="unlimited-status">
+				<span class="unlimited-badge">Unlimited</span>
+				<span class="expiry-info">Renews ${formattedExpiryDate}</span>
+			</div>
+		</div>
+	`;
+
+	return unlimitedDisplay;
+};
+
+/**
  * Gets the CSS class for the progress bar fill based on the usage percentage.
  * @param {number} percentage - The usage percentage.
  * @returns {string} The CSS class for the progress bar fill.
@@ -196,20 +230,22 @@ export const getFillClass = (percentage) => {
  * Creates a progress bar element based on the provided data.
  * @param {Object} data - The data for the progress bar.
  * @param {string} data.used - The amount used.
- * @param {string} data.limit - The total limit.
+ * @param {string|null} data.limit - The total limit (null for unlimited).
  * @param {string} data.volume_unit - The unit of volume (e.g., "GB").
  * @param {string} data.name - The name of the data package.
  * @param {string} data.expiry_date - The expiry date of the package.
- * @returns {HTMLElement} The created progress bar element.
+ * @returns {HTMLElement} The created progress bar or unlimited display element.
  */
 export const createProgressBar = (data) => {
-	const {
-		used,
-		limit,
-		volume_unit: quotaUnit,
-		name,
-		expiry_date: expiryDate,
-	} = data;
+	const { limit } = data;
+
+	// Check if this is an unlimited package (limit is null)
+	if (limit === null || limit === 'null') {
+		return createUnlimitedUsageDisplay(data);
+	}
+
+	// Regular progress bar for packages with limits
+	const { used, volume_unit: quotaUnit, name, expiry_date: expiryDate } = data;
 	const usedAmount = parseFloat(used);
 	const totalAmount = parseFloat(limit);
 	const usedPercentage = calculatePercentage(usedAmount, totalAmount);

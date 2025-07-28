@@ -1,7 +1,7 @@
 {
 	"name": "slt-bb-usage-checker",
 	"private": true,
-	"version": "1.4",
+	"version": "1.5.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
