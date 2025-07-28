@@ -260,6 +260,103 @@ main {
 	font-weight: 500;
 }
 
+/* Unlimited Usage Display Styles */
+.unlimited-usage-display {
+	margin-bottom: 25px;
+	padding: 15px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 12px;
+	color: white;
+	position: relative;
+	overflow: hidden;
+}
+
+.unlimited-usage-display::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: linear-gradient(
+			45deg,
+			rgba(255, 255, 255, 0.1) 25%,
+			transparent 25%
+		),
+		linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+		linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%),
+		linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%);
+	background-size: 20px 20px;
+	background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+	opacity: 0.3;
+	pointer-events: none;
+}
+
+.unlimited-usage-display h3 {
+	font-size: 16px;
+	margin-bottom: 12px;
+	font-weight: 600;
+	position: relative;
+	z-index: 1;
+}
+
+.unlimited-usage-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	position: relative;
+	z-index: 1;
+}
+
+.usage-amount.unlimited {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+}
+
+.usage-number {
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.usage-unit {
+	font-size: 14px;
+	font-weight: 500;
+	opacity: 0.9;
+}
+
+.usage-label {
+	font-size: 12px;
+	opacity: 0.8;
+	margin-left: 4px;
+}
+
+.unlimited-status {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+}
+
+.unlimited-badge {
+	background: rgba(255, 255, 255, 0.2);
+	padding: 4px 12px;
+	border-radius: 20px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.expiry-info {
+	font-size: 11px;
+	opacity: 0.8;
+	font-weight: 400;
+}
+
 footer {
 	margin-top: 20px;
 	display: inline-block;

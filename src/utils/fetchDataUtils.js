@@ -1,7 +1,7 @@
 // src/utils/fetchDataUtils.js
 
 /**
- * Get the data limit for unlimited packages
+ * Get the data limit for unlimited packages (legacy/fallback - 2025/07/28)
  * @param {string} packageName - The name of the package
  * @returns {number|null} - The data limit in GB or null if not an unlimited package
  */
@@ -25,6 +25,20 @@ export const getUnlimitedPackageLimit = (packageName) => {
 };
 
 /**
+ * Check if a package is truly unlimited (no caps)
+ * @param {string} packageName - The name of the package
+ * @param {string|null} limit - The limit value from API
+ * @returns {boolean} - True if package is truly unlimited
+ */
+export const isTrulyUnlimitedPackage = (packageName, limit) => {
+	const upperPackageName = packageName?.toUpperCase();
+	const containsUnlimited = upperPackageName?.includes('UNLIMITED');
+	const hasNullLimit = limit === null || limit === 'null';
+
+	return containsUnlimited && hasNullLimit;
+};
+
+/**
  * Process usage data for unlimited packages
  * @param {Object} data - The raw usage data from the API
  * @returns {Object} - The processed usage data with correct limits
@@ -44,6 +58,23 @@ export const processApiResponse = (data) => {
 };
 
 export const processUnlimitedPackageData = (data) => {
+	// Check if this is a truly unlimited package first
+	const mainPackItem = data.usage_data?.find(
+		(item) => item.service_name === 'Main Pack'
+	);
+
+	if (
+		mainPackItem &&
+		isTrulyUnlimitedPackage(data.package_name, mainPackItem.limit)
+	) {
+		// For truly unlimited packages, keep the data as-is (limit: null, remaining: null)
+		return {
+			...data,
+			is_truly_unlimited: true,
+		};
+	}
+
+	// Fallback to legacy unlimited package processing (with hardcoded limits)
 	const packageLimit = getUnlimitedPackageLimit(data.package_name);
 
 	if (!packageLimit) {
@@ -66,5 +97,6 @@ export const processUnlimitedPackageData = (data) => {
 	return {
 		...data,
 		usage_data: processedUsageData,
+		is_truly_unlimited: false,
 	};
 };
